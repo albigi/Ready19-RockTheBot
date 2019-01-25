@@ -1,0 +1,9 @@
+FROM microsoft/aspnetcore:2.0
+
+# Copy the app
+WORKDIR /app/
+COPY ./bin/Release/ .
+
+EXPOSE 80
+
+CMD ["dotnet", "./RockTheBot.dll"]
