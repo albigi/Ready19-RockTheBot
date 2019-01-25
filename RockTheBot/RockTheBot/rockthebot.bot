@@ -1,0 +1,23 @@
+{
+  "name": "RockTheBot",
+  "services": [
+    {
+      "type": "endpoint",
+      "name": "development",
+      "endpoint": "http://localhost:3978/api/messages",
+      "appId": "",
+      "appPassword": "",
+      "id": "1"
+    },
+    {
+      "type": "endpoint",
+      "name": "production",
+      "endpoint": "http://localhost:80/api/messages",
+      "appId": "",
+      "appPassword": "",
+      "id": "2"
+    }
+  ],
+  "padlock": "",
+  "version": "2.0"
+}
