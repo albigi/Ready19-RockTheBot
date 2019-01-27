@@ -1,10 +1,8 @@
-REM Build App
 ECHO OFF
-set dir=RockTheBot
+set dir=rockthebot
 cd %dir%
 dotnet publish -c Release -o ..\bin\Release\
 
-REM Build Docker Img
 cd ..\
 docker stop %dir%
 docker rm %dir%
