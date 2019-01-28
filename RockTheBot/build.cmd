@@ -1,5 +1,5 @@
 ECHO OFF
-set dir=rockthebot
+for %%I in (.) do set dir=%%~nxI
 cd %dir%
 dotnet publish -c Release -o ..\bin\Release\
 
