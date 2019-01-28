@@ -1,5 +1,5 @@
 ECHO OFF
-for %%I in (.) do set dir=%%~nxI
+set dir=servicesproviderweb
 cd %dir%
 dotnet publish -c Release -o ..\bin\Release\
 
