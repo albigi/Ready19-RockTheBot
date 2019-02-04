@@ -8,3 +8,5 @@ docker stop %dir%
 docker rm %dir%
 docker build -t %dir% .
 docker run -d -p 80:80 --name %dir% %dir%
+
+PAUSE
