@@ -1,4 +1,4 @@
-@ECHO OFF
+ECHO OFF
 set dir=rockthebot
 cd %dir%
 dotnet publish -c Release -o ..\bin\Release\

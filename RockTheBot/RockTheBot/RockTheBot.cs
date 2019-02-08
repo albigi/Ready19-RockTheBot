@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Ready19.RockTheBot.Translation;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using RockTheBot;
 
 namespace Ready19.RockTheBot
 {
@@ -29,11 +30,10 @@ namespace Ready19.RockTheBot
     {
         private const string EnglishEnglish = "en";
         private const string EnglishSwedish = "sv";
-        private const string SwedishEnglish = "in";
-        private const string SwedishSwedish = "of";
-        private const string RomanianRomanian = "of";
         private const string EnglishRomanian = "ro";
-        private const string RomanianEnglish = "in";
+        private const string EnglishItalian = "it";
+        private const string OtherToEnglish = "in";
+        private const string KeepOther = "of";
 
         // Messages sent to the user.
         private const string WelcomeMessage = @"Hello! I am a MultiLingual Bot that tells you information about stocks and the weather. Start by selecting your language. Then select what information you need";
@@ -47,6 +47,7 @@ namespace Ready19.RockTheBot
         /// </summary>
         /// <param name="accessors">Bot State Accessors.</param>
         /// <param name="statePropertyAccessor"> Bot state accessor object.</param>
+        /// <param name="services"> Stocks and Weather services.</param>
         public RockTheBot(RockTheBotAccessors accessors, IRockTheBotServices services)
         {
             _accessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
@@ -85,9 +86,6 @@ namespace Ready19.RockTheBot
                     // Update user state flag to reflect bot handled first user interaction.
                     await _accessors.WelcomeUserState.SetAsync(turnContext, didBotWelcomeUser);
                     await _accessors.UserState.SaveChangesAsync(turnContext);
-
-                    // the channel should sends the user name in the 'From' object
-                    var userName = turnContext.Activity.From.Name;
                 }
 
                 string userLanguage = await _accessors.LanguagePreference.GetAsync(turnContext, () => TranslationSettings.DefaultLanguage) ?? TranslationSettings.DefaultLanguage;
@@ -96,20 +94,15 @@ namespace Ready19.RockTheBot
 
                 if (IsLanguageChangeRequested(turnContext.Activity.Text))
                 {
-                    var curentLang = turnContext.Activity.Text.ToLower();
-                    var lang = curentLang;
-                    if (curentLang == SwedishEnglish || curentLang == RomanianEnglish)
-                    {
-                        lang = EnglishEnglish;
-                    }
+                    var currentLang = turnContext.Activity.Text.ToLower();
+                    var lang = currentLang == OtherToEnglish ? EnglishEnglish : currentLang;
+                    userLanguage = lang;
 
-                    // var lang = curentLang == EnglishEnglish || curentLang == SwedishEnglish ? EnglishEnglish : EnglishSwedish;
-
-                    // If the user requested a language change through the suggested actions with values "es" or "en",
+                    // If the user requested a language change through the suggested actions,
                     // simply change the user's language preference in the user state.
                     // The translation middleware will catch this setting and translate both ways to the user's
                     // selected language.
-                    // If Swedish was selected by the user, the reply below will actually be shown in Swedish to the user.
+                    // The reply below will actually be shown in the language that the user selected.
                     await _accessors.LanguagePreference.SetAsync(turnContext, lang);
                     var reply = turnContext.Activity.CreateReply($"Your current language code is: {lang}");
 
@@ -119,32 +112,42 @@ namespace Ready19.RockTheBot
                     await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
                 }
 
-                if (turnContext.Activity.Text.ToLower().Contains("language"))
+                var messageText = turnContext.Activity.Text;
+                if (messageText.ToLower().Contains("language"))
                 {
                     // Show the user the possible options for language. If the user chooses a different language
                     // than the default, then the translation middleware will pick it up from the user state and
                     // translate messages both ways, i.e. user to bot and bot to user.
-                    await SendLanguageCardAsync(turnContext, cancellationToken);
+                    await SendLanguageCardAsync(turnContext, cancellationToken, userLanguage);
                 }
-                else if (turnContext.Activity.Text.ToLower().Contains("weather"))
+                else if (messageText.ToLower().Contains("weather"))
                 {
-                    // responseMessage = $"Here's the latest weather for Seattle, WA: <strong>{await GetLatestStockValueAsync()}</strong>\n";
-                    var responseMessage = $"Here's the latest weather for Seattle, WA: "
-                        + await _services.GetWeatherAsync();
+                    var parsedMessage = messageText.Split("weather", StringSplitOptions.RemoveEmptyEntries);
+                    string city = "Seattle";
+                    if (parsedMessage.Length > 1)
+                        city = parsedMessage[parsedMessage.Length - 1] ?? city;
+
+                    var responseMessage = $"Here's the weather info for {city}:\n";
+                    var theResponse = _services.GetWeatherAsync(city);
+                    await turnContext.SendActivityAsync(new Activity("typing"));
+                    var jsonresponse = JObject.Parse(await theResponse);
+                    responseMessage += JsonConvert.SerializeObject(jsonresponse, Formatting.Indented).TrimStart('{').TrimEnd('}');
+                    responseMessage = responseMessage.Replace("\"", " ");
                     await turnContext.SendActivityAsync(responseMessage);
-                    await SendSuggestedActionsAsync(turnContext, cancellationToken);
+                    await SendSuggestedActionsAsync(turnContext, cancellationToken, userLanguage);
                 }
-                else if (turnContext.Activity.Text.ToLower().Contains("stocks"))
+                else if (messageText.ToLower().Contains("stocks"))
                 {
-                    // responseMessage = $"I see, always thinking about money you are!\nHere's the latest MSFT stock value: <strong>{await GetLatestStockValueAsync()}</strong>\n";
-                    var responseMessage = $"I see, always thinking about money you are!\nHere's the latest MSFT stock value: "
-                        + await _services.GetStocksAsync();
+                    var theResponse = _services.GetStocksAsync();
+                    await turnContext.SendActivityAsync(new Activity("typing"));
+                    var responseMessage = $"I see, always thinking about money!\nHere's the latest MSFT stock value: "
+                        + await theResponse;
                     await turnContext.SendActivityAsync(responseMessage);
-                    await SendSuggestedActionsAsync(turnContext, cancellationToken);
+                    await SendSuggestedActionsAsync(turnContext, cancellationToken, userLanguage);
                 }
                 else
                 {
-                    await SendSuggestedActionsAsync(turnContext, cancellationToken);
+                    await SendSuggestedActionsAsync(turnContext, cancellationToken, userLanguage);
                 }
             }
 
@@ -167,7 +170,7 @@ namespace Ready19.RockTheBot
                         if (member.Id != turnContext.Activity.Recipient.Id)
                         {
                             await turnContext.SendActivityAsync(WelcomeMessage, cancellationToken: cancellationToken);
-                            await SendLanguageCardAsync(turnContext, cancellationToken);
+                            await SendLanguageCardAsync(turnContext, cancellationToken, "en");
                         }
                     }
                 }
@@ -177,31 +180,32 @@ namespace Ready19.RockTheBot
             await _accessors.UserState.SaveChangesAsync(turnContext);
         }
 
-        private static async Task SendLanguageCardAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+        private static async Task SendLanguageCardAsync(ITurnContext turnContext, CancellationToken cancellationToken, string language)
         {
             var reply = turnContext.Activity.CreateReply("Choose your language:");
             reply.SuggestedActions = new SuggestedActions()
             {
                 Actions = new List<CardAction>()
                         {
-                            new CardAction() { Title = "Swedish", Type = ActionTypes.PostBack, Value = EnglishSwedish },
-                            new CardAction() { Title = "English", Type = ActionTypes.PostBack, Value = EnglishEnglish },
-                            new CardAction() { Title = "Romanian", Type = ActionTypes.PostBack, Value = EnglishRomanian },
+                            new MultilingualCardAction(language) { CardTitle = "Swedish", Type = ActionTypes.PostBack, Value = EnglishSwedish },
+                            new MultilingualCardAction(language) { CardTitle = "English", Type = ActionTypes.PostBack, Value = EnglishEnglish },
+                            new MultilingualCardAction(language) { CardTitle = "Romanian", Type = ActionTypes.PostBack, Value = EnglishRomanian },
+                            new MultilingualCardAction(language) { CardTitle = "Italian", Type = ActionTypes.PostBack, Value = EnglishItalian },
                         },
             };
 
             await turnContext.SendActivityAsync(reply);
         }
 
-        private static async Task SendSuggestedActionsAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+        private static async Task SendSuggestedActionsAsync(ITurnContext turnContext, CancellationToken cancellationToken, string language)
         {
             var cardsuggestion = turnContext.Activity.CreateReply("What do you want to know:");
             cardsuggestion.SuggestedActions = new SuggestedActions()
             {
                 Actions = new List<CardAction>()
                         {
-                            new CardAction() { Title = "Stocks", Type = ActionTypes.PostBack, Value = "Stocks" },
-                            new CardAction() { Title = "Weather", Type = ActionTypes.PostBack, Value = "Weather" },
+                            new MultilingualCardAction(language) { CardTitle = "Stocks", Type = ActionTypes.PostBack, Value = "Stocks" },
+                            new MultilingualCardAction(language) { CardTitle = "Weather", Type = ActionTypes.PostBack, Value = "Weather" },
                         },
             };
 
@@ -217,8 +221,7 @@ namespace Ready19.RockTheBot
 
             utterance = utterance.ToLower().Trim();
             return utterance == EnglishSwedish || utterance == EnglishEnglish
-                || utterance == SwedishSwedish || utterance == SwedishEnglish || utterance == EnglishRomanian;
+                || utterance == KeepOther || utterance == OtherToEnglish || utterance == EnglishRomanian || utterance == EnglishItalian;
         }
-
     }
 }

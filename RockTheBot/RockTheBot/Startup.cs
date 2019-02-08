@@ -13,11 +13,11 @@ using Microsoft.Bot.Builder.Integration;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
-using Ready19.RockTheBot.Translation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Ready19.RockTheBot.Translation;
 
 namespace Ready19.RockTheBot
 {
@@ -26,6 +26,7 @@ namespace Ready19.RockTheBot
     /// </summary>
     public class Startup
     {
+        public static string TranslationKey;
         private ILoggerFactory _loggerFactory;
         private bool _isProduction = false;
 
@@ -77,7 +78,11 @@ namespace Ready19.RockTheBot
                     throw new InvalidOperationException($"The .bot file does not contain an endpoint with name '{environment}'.");
                 }
 
-                options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
+                //options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
+                //BOT ID and Pass are stored as env variables and injected by Kubernetes at runtime
+                options.CredentialProvider = new SimpleCredentialProvider(
+                    Environment.GetEnvironmentVariable("_ROCKTHEBOTAPPID") ?? string.Empty,
+                    Environment.GetEnvironmentVariable("_ROCKTHETOBAPPPWD") ?? string.Empty);
 
                 // Creates a logger for the application to use.
                 ILogger logger = _loggerFactory.CreateLogger<RockTheBot>();
@@ -124,15 +129,15 @@ namespace Ready19.RockTheBot
                 options.State.Add(userState);
 
                 // Translation key from settings
-                var translatorKey = Configuration.GetValue<string>("translatorKey");
+                TranslationKey = Configuration.GetValue<string>("translatorKey");
 
-                if (string.IsNullOrEmpty(translatorKey))
+                if (string.IsNullOrEmpty(TranslationKey))
                 {
                     throw new InvalidOperationException("Microsoft Text Translation API key is missing. Please add your translation key to the 'translatorKey' setting.");
                 }
 
                 // Translation middleware setup
-                var translator = new MicrosoftTranslator(translatorKey);
+                var translator = new MicrosoftTranslator(TranslationKey);
 
                 var translationMiddleware = new TranslationMiddleware(translator, userState.CreateProperty<string>("LanguagePreference"));
                 options.Middleware.Add(translationMiddleware);
@@ -168,12 +173,13 @@ namespace Ready19.RockTheBot
                     ConversationDialogState = conversationState.CreateProperty<DialogState>("DialogState"),
                     LanguagePreference = userState.CreateProperty<string>("LanguagePreference"),
                     WelcomeUserState = userState.CreateProperty<WelcomeUserState>(RockTheBotAccessors.WelcomeUserName),
+                    LanguageKey = userState.CreateProperty<string>(RockTheBotAccessors.TranslationKey),
                 };
 
                 return accessors;
             });
 
-            //add config to the DI container
+            // add config to the DI container
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<IRockTheBotServices, RockTheBotServices>();
         }

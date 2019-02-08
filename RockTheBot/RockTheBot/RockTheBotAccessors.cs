@@ -32,6 +32,8 @@ namespace Ready19.RockTheBot
         /// <value>The accessor name for the WelcomeUser state.</value>
         public static string WelcomeUserName { get; } = $"{nameof(RockTheBotAccessors)}.WelcomeUserState";
 
+        public static string TranslationKey { get; } = $"{nameof(RockTheBotAccessors)}.WelcomeUserState";
+
         public IStatePropertyAccessor<DialogState> ConversationDialogState { get; set; }
 
         /// <summary>
@@ -41,6 +43,8 @@ namespace Ready19.RockTheBot
         /// User language preference.
         /// </value>
         public IStatePropertyAccessor<string> LanguagePreference { get; set; }
+
+        public IStatePropertyAccessor<string> LanguageKey { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ConversationState"/> object for the conversation.

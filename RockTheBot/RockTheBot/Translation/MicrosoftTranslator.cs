@@ -7,8 +7,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Ready19.RockTheBot.Translation.Model;
 using Newtonsoft.Json;
+using Ready19.RockTheBot.Translation.Model;
 
 namespace Ready19.RockTheBot.Translation
 {
