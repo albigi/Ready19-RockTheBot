@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rockthebot-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - <DNS_NAME_HERE>.westus.cloudapp.azure.com
+    secretName: rockthebot-cert
+  rules:
+  - host: <DNS_NAME_HERE>.westus.cloudapp.azure.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rockthebot
+          servicePort: 80
