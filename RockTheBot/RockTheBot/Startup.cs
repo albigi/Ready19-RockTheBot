@@ -82,7 +82,7 @@ namespace Ready19.RockTheBot
                 //BOT ID and Pass are stored as env variables and injected by Kubernetes at runtime
                 options.CredentialProvider = new SimpleCredentialProvider(
                     Environment.GetEnvironmentVariable("_ROCKTHEBOTAPPID") ?? string.Empty,
-                    Environment.GetEnvironmentVariable("_ROCKTHETOBAPPPWD") ?? string.Empty);
+                    Environment.GetEnvironmentVariable("_ROCKTHEBOTAPPPWD") ?? string.Empty);
 
                 // Creates a logger for the application to use.
                 ILogger logger = _loggerFactory.CreateLogger<RockTheBot>();
@@ -139,8 +139,7 @@ namespace Ready19.RockTheBot
                 // Translation middleware setup
                 var translator = new MicrosoftTranslator(TranslationKey);
 
-                var translationMiddleware = new TranslationMiddleware(translator, userState.CreateProperty<string>("LanguagePreference"));
-                options.Middleware.Add(translationMiddleware);
+                //TODO: complete the code!
             });
 
             // Create and register state accessors.

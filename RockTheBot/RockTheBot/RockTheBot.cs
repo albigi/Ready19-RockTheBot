@@ -81,11 +81,7 @@ namespace Ready19.RockTheBot
             {
                 if (didBotWelcomeUser.DidBotWelcomeUser == false)
                 {
-                    didBotWelcomeUser.DidBotWelcomeUser = true;
-
-                    // Update user state flag to reflect bot handled first user interaction.
-                    await _accessors.WelcomeUserState.SetAsync(turnContext, didBotWelcomeUser);
-                    await _accessors.UserState.SaveChangesAsync(turnContext);
+                    //TODO: complete the code!
                 }
 
                 string userLanguage = await _accessors.LanguagePreference.GetAsync(turnContext, () => TranslationSettings.DefaultLanguage) ?? TranslationSettings.DefaultLanguage;
@@ -185,13 +181,7 @@ namespace Ready19.RockTheBot
             var reply = turnContext.Activity.CreateReply("Choose your language:");
             reply.SuggestedActions = new SuggestedActions()
             {
-                Actions = new List<CardAction>()
-                        {
-                            new MultilingualCardAction(language) { CardTitle = "Swedish", Type = ActionTypes.PostBack, Value = EnglishSwedish },
-                            new MultilingualCardAction(language) { CardTitle = "English", Type = ActionTypes.PostBack, Value = EnglishEnglish },
-                            new MultilingualCardAction(language) { CardTitle = "Romanian", Type = ActionTypes.PostBack, Value = EnglishRomanian },
-                            new MultilingualCardAction(language) { CardTitle = "Italian", Type = ActionTypes.PostBack, Value = EnglishItalian },
-                        },
+                //TODO: complete the code!
             };
 
             await turnContext.SendActivityAsync(reply);
