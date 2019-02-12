@@ -6,7 +6,6 @@
 ----------------- 
 
 ## CONTENTS ##
-- [<p align="center"> Microsoft Ready 2019 <br/><br/> AI-APP-ST315 <br/><br/><br/><br/> Rock the Bot: build a highly scalable Bot using Bot Framework, ASP[]().NET Core and Kubernetes <br/><br/>](#p-align%22center%22-microsoft-ready-2019-brbr-ai-app-st315-brbrbrbr-rock-the-bot-build-a-highly-scalable-bot-using-bot-framework-aspnet-core-and-kubernetes-brbr)
   - [CONTENTS](#contents)
   - [INTRODUCTION](#introduction)
     - [Estimated time](#estimated-time)
@@ -29,17 +28,15 @@
     - [Task 4 - Test the Bot](#task-4---test-the-bot)
   - [EXERCISE 3 - CREATE AND DEPLOY THE CONTAINERS](#exercise-3---create-and-deploy-the-containers)
     - [Task 1 - Create and run the containers](#task-1---create-and-run-the-containers)
-- [Copy the app](#copy-the-app)
-    - [[Optional] Task 2 - Test the Bot in the container](#optional-task-2---test-the-bot-in-the-container)
+    - [[OPTIONAL] Task 2 - Test the Bot in the container](#optional-task-2---test-the-bot-in-the-container)
     - [Task 3 - Deploy the containers to ACR](#task-3---deploy-the-containers-to-acr)
   - [EXERCISE 4 - CONFIGURE AKS](#exercise-4---configure-aks)
     - [Task 1 - Create a new service in AKS](#task-1---create-a-new-service-in-aks)
     - [Task 2 - Configure the reverse proxy](#task-2---configure-the-reverse-proxy)
     - [Task 3 - Test the Bot](#task-3---test-the-bot)
-  - [EXERCISE 5 - PUBLISH THE BOT](#exercise-5---publish-the-bot)
+  - [[OPTIONAL] EXERCISE 5 - PUBLISH THE BOT](#optional-exercise-5---publish-the-bot)
     - [Task 1 - Create the Bot Service](#task-1---create-the-bot-service)
     - [Task 2 - Configure the AKS secrets](#task-2---configure-the-aks-secrets)
-- [Data](#data)
     - [Task 3 - Create the channels](#task-3---create-the-channels)
   - [EPILOGUE](#epilogue)
 
@@ -208,19 +205,24 @@ git clone https://github.com/albigi/Ready19-RockTheBot.git
 ~~~
 
 In Explorer you should now see a folder named **Ready19-RockTheBot**. This is the main solution folder!
-If you open the project folder, you'll see there are two subfolders:
+You will notice it contains two subfolders:
 1. **RockTheBot** is the actual bot folder!
-2. **ServicesProviderWeb** is a *service* ASP.[]()NET Core Web API the bot relies on to access some of the data it needs. Its role will become clearer later in the exercises.
+2. **ServicesProviderWeb** is a *service* ASP[]().NET Core Web API the bot relies on to access some of the data it needs. Its role will become clearer later in the exercises.
+
+Before moving forward, you should initialize the **Azure CLI**. In the main solution folder run the **initialize.bat** script and login to Azure using the same credentials you used in the previous exercise. 
+
+>In case you are using your own account to login to Azure and you have access to multiple subscriptions, the previous script will give you access to the *default subscription*. To switch subscriptions, you can use `az account set --subscription "SUB NAME OR ID"`
 
 ### Task 2 - Complete the code ###
 You will now start working on the actual bot code. This version of the code was slightly customized out of the default Azure Bot Service template. But don't worry, you will be adding all the juicy details and customizations!
 >If you try to compile the code as is, it won't work. This is expected and you will have to complete it reading on.
 
-First, open the **RockTheBot** folder in Visual Studio Code: right click on the folder in Explorer and select **Open with Code**.<br/>
-Visual Studio Code should prompt to restore dependencies and tools for the project automatically, but in case it doesn't, you can open the Terminal (**View > Terminal**) and run `dotnet restore` to get started.
+First, open the **RockTheBot** folder in Visual Studio Code: right click on the folder in Explorer and select **Open with Code**.
+
+>At some point Visual Studio Code should prompt you to restore *unresolved dependencies* for the project: accept and click **Restore**.
 
 #### 1. Translation middleware ####
-The new Bot Framework v4 had the ASP.[]()NET Core integration as one of its main goals. Actually, a v4 bot is nothing else than a ASP()[].NET Core Web API with specialized middleware.<br/>
+The new Bot Framework v4 had the ASP[]().NET Core integration as one of its main goals. Actually, a v4 bot is nothing else than a ASP.()[]NET Core Web API with specialized middleware.<br/>
 Indeed, middleware is one of the bonus aspects of the v4 SDK: expanding and customizing the bot functionality is now much easier.
 
 >A middleware is a piece of code that is assembled into an app pipeline to handle requests and responses. Middlewares are executed one by one, in the order in which they are declared in the **Startup.ConfigureServices()** method.
@@ -318,31 +320,25 @@ Notice the `_accessors` object provides access to the different user states defi
 
 
 ### Task 3 - Build and Run the Bot ###
-Now that you are done editing the code, the very first thing to do is making sure both the bot and the Services App compile and run.
+Now that you are done editing the code, you need to make sure both applications actually compile and run.
 
-1. Open the main project folder (i.e: *Code* on the Desktop)
-2. Right click on *RockTheBot* and select ***Open with Code***. A new instance of VS Code appears.
-3. In the VS Code Explorer, select the file ***RockTheBot > Program.cs***. Then select ***Debug > Start Debugging*** (or hit F5)
-4. VS will prompt for the environment to use: select ***.NET Core***.
-5. VS will show you the default *launch* settings, leave the defaults and close the file.
-6. **Press F5** to start the application.
-7. After a few seconds, you should see your bot is live!
+1. Browse to the **RockTheBot** folder and open it in Visual Studio Code
+2. Select ***Debug > Start Debugging*** (or hit F5)
+   >VS might prompt you to either download the *required assets* or select the debugging environment to use. Select *yes* in the former case or *.NET Core* in the latter.
+3. After a few seconds, you should see your bot is live!
    
    ![botReady](img/2.3-botReady.png)
 
    It is now time to run the services API too!
    Leave the VS instance running and move back to the main code folder.
 
-8. Repeat the steps `1` and `2` but open the *ServicesProviderWeb* folder this time.
-9. In the new instance of VSCode repeat the steps `3` to `6` and wait for the API to be online.
-   >If this is the first time you open this project, VS might warn you:
+4. Repeat the steps `1` and `2` but open the **ServicesProviderWeb** folder this time. You should have two instances of VS Code running at this point.
+5. In the new instance of VSCode press F5 and wait for the application to be online.
+   >If this is the first time you open this project, VS might warn you also this time:
       ![requiredassets](img/2.3-requiredAssets.png)
-      
-   >This means **dotnet restore** was not run on this project. Click **Yes** to have VS run it automatically or run it manually from the terminal inside of the *ServicesProviderWeb* folder.
-   Once done, start the debug again!
-
-10. The browser will open and show you a 404 page: this is OK as the API does not use any welcome page.
-11. To test the API is working fine, try tro browse to [http://localhost:5000/api/weather](#). You should get a similar result:
+   
+6.  The browser will open and show you a 404 page: this is OK as the API does not use any welcome page.
+7.  To test the API is working fine, try to browse to [http://localhost:5000/api/weather](#). You should get a similar result:
     
          {"Name":"Seattle","Country":"US","Description":"fog","Temperature":"9.4C (49F)"}
 
@@ -358,8 +354,6 @@ The **Bot Framework Emulator** is a troubleshooting application designed to help
 3. If the endpoint is correct and the bot is up and running, you should see the Bot's welcome message:
    
    ![bfe](img/2.4-bfe.png)
-
-   >Bot Framework Emulator description here
 
 4. Select your favorite language and ask the Bot for the MSFT Stock value or the current weather
 5. You should get a similar output
@@ -400,7 +394,7 @@ This file essentially accomplishes two tasks:
    > docker build -t %dir% .<br/>
    docker run -d `-p 80:80` --name %dir% %dir%
 
-Upfront running the build file, you can peek at the **DockerFile** in the same directory. This file is used by Docker to build the image.
+Before running the build file, you can peek at the **DockerFile** in the same directory. This file is used by Docker to build the image.
 
 ~~~
 FROM microsoft/aspnetcore:2.0
@@ -462,6 +456,8 @@ It is now time to run the build file:
    Press any key to continue . . .
    ~~~
 
+   >The error *No such container* is expected when you run the build process for the first time!
+
 2. Verify the command logged the following lines:
    >RockTheBot -> C:\Users\Ready19\Desktop\Code\Ready19-RockTheBot\RockTheBot\bin\Release\
 
@@ -503,7 +499,7 @@ If you built the Bot application first, *RockTheBot* should be the container run
 >In case you are unable to connect to the Bot (no welcome message is displayed and if you try to type a message you get the error ***couldn't send. retry***), this could be a bug in the Emulator. To sort it out make sure the Bot Framework Emulator is setup as follows:<br/><br/>
    a. Click on the settings gear, bottom left:<br/>
    ![bfeSettings](img/3.2-bfeSettings.png)<br/>
-   b. Make sure the Emulator is set to use **ngrock** for local addresses (bypass must be **disabled**<br/>
+   b. Make sure the Emulator is set to use **ngrock** for local addresses (bypass must be **disabled**)<br/>
    ![bfeSetup1](img/3.2-bfeSetup1.png)<br/>
    c. Type `localhost` in the ***localhost override** field. Delete it in case it was already populated. <br/>
    d. Save the settings, close the settings tab and restart the conversation <br/>
@@ -601,7 +597,9 @@ Kubernetes can be managed via a command line interface, named `kubectl`, which a
 
 4. Now **kubectl** is ready and connected to your cluster. You are ready to explore the GUI. In Powershell run:<br/>
    `az aks browse --resource-group` *`yourRGname`* ` --name ` *`yourAKSname`*<br/>
-   Wait a few seconds for the proxy to be online and the browser to open the Kubernetes UI
+   Wait a few seconds for the proxy to be online and the browser to open the Kubernetes UI.
+
+   >`az aks browse` connects you to your cluster and provides a graphical management interface. The connection to the cluster might become stale after a while: **if you notice the UI stops refreshing or responding, make sure to terminate the command and run it again**. 
 
 5. AKS automatically deploys some *services* to the cluster. One of those is the *kubernetes* service which will be listed in the available services.
    
@@ -847,7 +845,9 @@ You should be able to interact with the bot:
 
 ![success](img/4.3-success.png)
 
-## EXERCISE 5 - PUBLISH THE BOT ##
+> One of the main reasons why people move their workloads to AKS is **scaling**. AKS allows you to easily scale your cluster up (larger node size) and out (deploying more nodes) without any service disruption. Whenever scaling occurs and new nodes are addedd or remove from the cluster, Kubernetes takes care of updating the cluster configuration in a way that no service downtime is experienced. In addition to scaling the cluster, individual deployments can also be scaled so that most demanding services can be assigned more resources with respect to lower demanding workloads.<br/> 
+
+## [OPTIONAL] EXERCISE 5 - PUBLISH THE BOT ##
 <p style="border: 2px solid gray; padding: 5px">In this exercise you will create a new Azure Bot Service to publish your AKS Bot on the Teams and Skype channels.</p>
 
 Now that the bot is ready you can proceed to create the Azure Bot Service resource to link it to the channels you care for.
