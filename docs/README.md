@@ -581,7 +581,7 @@ Kubernetes can be managed via a command line interface, named `kubectl`, which a
 1. **kubectl** should be already available on your system. Open a new Powershell and make sure it is available by typing:<br/>
 `Get-Command kubectl`
 
-2. Should **kubectl** not be avaialbe, you can install it by running<br/>
+2. Should **kubectl** not be available, you can install it by running<br/>
    `az aks install-cli`
 
 3. The very next step is to authorize your remote cluster for management by the local instance of **kubectl**. In the Powershell window type:<br/>
@@ -625,15 +625,17 @@ Kubernetes can be managed via a command line interface, named `kubectl`, which a
    
    You can either enter a *YAML* file or create a new service manually. Create a new service at this time: select **Create an app**. Fill in the form as follows:
    1. **App name**: `rockthebot`
-   2. **Container image**: full image tag of the container, e.g: `youraliasaks.azurecr.io/rockthebot`
+   2. **Container image**: full image tag of the container, e.g: `youraliasacr.azurecr.io/rockthebot`
    3. **Number of pods**: select 3
    
       > Pods are the smallest unit of work in a Kubernetes cluster. They represent the single application instances running and can be in most cases associated to the number of containers being deployed.
 
    4. **Service**: set it to `Internal` as the Bot should not be directly published on the Internet.
-   5. **Port mapping**: Both *Port* and *Internal port* must be `80` (default HTTP port) as exposed by the container.
+   5. **Port mapping**: Both *Port* and *Target port* must be `80` (default HTTP port) as exposed by the container.
 
    6. Confirm by hitting **Create** at the bottom of the screen.
+
+   > Be aware that Pods are distinct instances of the container. You should plan for a shared way to manage state if your services are stateful. 
 
 8. To deploy the services API, you can repeat the previous steps and **make sure to call the new service `servicesproviderweb` and pull the image `albigiready19acr.azurecr.io/servicesproviderweb`**.<br/>
    This is important as this name is used by the internal AKS DNS service to map a service name to its Pods.
@@ -681,7 +683,8 @@ There are several reverse proxy solutions that can be deployed in a container. H
    1. Identify the public IP resource in Azure:<br/>
    `az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, 'X.X.X.X')].[id]" --output tsv`
       
-      Where *X.X.X.X* is the public IP identified earlier.<br/>
+      Where ***X.X.X.X*** is the public IP identified earlier.
+
       You should obtain a resource id like the following:
 
       ```
