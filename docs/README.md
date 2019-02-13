@@ -259,7 +259,7 @@ Now the translation middleware is plugged-in, it is time to construct the card t
 
 >If the bot's response to the user needs to contain something other than text, we can use a card to display any combination of text, speech, images, buttons, and input fields. There are different types of cards, depending on what type of interaction you are designing for your bot.
 
-A simple way to present buttons to the user is to use **SuggestedActions**. You can create a list of suggested actions that will be shown to the user for a single turn of the conversation.
+We have used a HeroCard as a simple way to present buttons to the user. The HeroCard allows us to create a list of suggested actions that will be shown to the user for a single turn of the conversation.
 
 In the **RockTheBot.cs** file, locate the **SendLanguageCardAsync** method:
 
@@ -267,18 +267,24 @@ In the **RockTheBot.cs** file, locate the **SendLanguageCardAsync** method:
 private static async Task SendLanguageCardAsync(ITurnContext turnContext, CancellationToken cancellationToken)
 {
    var reply = turnContext.Activity.CreateReply("Choose your language:");
+   reply.Attachments = new List<Attachment>();
+   List<CardAction> cardButtons = new List<CardAction>();
    
    # TODO :  add the different actions for each language. 
-   reply.SuggestedActions = new SuggestedActions()
-   {
    //do something awesome here
+
+   HeroCard heroCard = new HeroCard()
+   {
+      Buttons = cardButtons,
    };
+   Attachment attachment = heroCard.ToAttachment();
+   reply.Attachments.Add(attachment);
    await turnContext.SendActivityAsync(reply);
 }
 ```
-You should now complete the method and define what the **SuggestedActions** card should look like.
+You should now complete the method and define what the **HeroCard** card should look like.
 
->Hint: you can peek at the implementation of a *SuggestedActions card* for another user prompt in the method **SendSuggestedActionsAsync**<br/><br/>
+>Hint: you can peek at the implementation of a *HeroCard* for another user prompt in the method **SendSuggestedActionsAsync**<br/><br/>
 The full code block is also available in the **CodeFile.cs** file.
 
 #### 3. Keeping track of the user state ####

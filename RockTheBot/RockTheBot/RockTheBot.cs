@@ -179,10 +179,16 @@ namespace Ready19.RockTheBot
         private static async Task SendLanguageCardAsync(ITurnContext turnContext, CancellationToken cancellationToken, string language)
         {
             var reply = turnContext.Activity.CreateReply("Choose your language:");
-            reply.SuggestedActions = new SuggestedActions()
+            reply.Attachments = new List<Attachment>();
+            List<CardAction> cardButtons = new List<CardAction>();
+
+            // TODO: complete the code!
+            HeroCard heroCard = new HeroCard()
             {
-                //TODO: complete the code!
+                Buttons = cardButtons,
             };
+            Attachment attachment = heroCard.ToAttachment();
+            reply.Attachments.Add(attachment);
 
             await turnContext.SendActivityAsync(reply);
         }
@@ -190,14 +196,16 @@ namespace Ready19.RockTheBot
         private static async Task SendSuggestedActionsAsync(ITurnContext turnContext, CancellationToken cancellationToken, string language)
         {
             var cardsuggestion = turnContext.Activity.CreateReply("What do you want to know:");
-            cardsuggestion.SuggestedActions = new SuggestedActions()
+            cardsuggestion.Attachments = new List<Attachment>();
+            List<CardAction> cardButtons = new List<CardAction>();
+            cardButtons.Add(new MultilingualCardAction(language) { CardTitle = "Stocks", Type = ActionTypes.PostBack, Value = "Stocks" });
+            cardButtons.Add(new MultilingualCardAction(language) { CardTitle = "Weather", Type = ActionTypes.PostBack, Value = "Weather" });
+            HeroCard heroCard = new HeroCard()
             {
-                Actions = new List<CardAction>()
-                        {
-                            new MultilingualCardAction(language) { CardTitle = "Stocks", Type = ActionTypes.PostBack, Value = "Stocks" },
-                            new MultilingualCardAction(language) { CardTitle = "Weather", Type = ActionTypes.PostBack, Value = "Weather" },
-                        },
+                Buttons = cardButtons,
             };
+            Attachment attachment = heroCard.ToAttachment();
+            cardsuggestion.Attachments.Add(attachment);
 
             await turnContext.SendActivityAsync(cardsuggestion, cancellationToken);
         }
