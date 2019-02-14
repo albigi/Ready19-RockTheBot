@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-APP-ST315</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1><p align="center"> Microsoft Ready 2019 <br><br> AI-APP-ST315 <br><br><br><br> Rock the Bot: build a highly scalable Bot using Bot Framework, ASP.NET Core and Kubernetes
+</p></h1>
+<h3>
+<p align="center">Alessandro Bigi (<b>albigi</b>)</p>
+<p align="center">Roxana Gheorghe (<b>rogheorg</b>)</p>
+</h3>
+<hr>
+<h2 id="contents">CONTENTS</h2>
+<ul>
+<li><a href="#contents">CONTENTS</a></li>
+<li><a href="#introduction">INTRODUCTION</a>
+<ul>
+<li><a href="#estimated-time">Estimated time</a></li>
+<li><a href="#objectives">Objectives</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#lab-overview">Lab Overview</a></li>
+<li><a href="#solution-architecture">Solution Architecture</a></li>
+<li><a href="#computers-in-this-lab">Computers in this lab</a></li>
+</ul>
+</li>
+<li><a href="#getting-things-ready">GETTING THINGS READY</a></li>
+<li><a href="#exercise-1---azure-setup">EXERCISE 1 - AZURE SETUP</a>
+<ul>
+<li><a href="#task-1---create-a-new-acr">Task 1 - Create a new ACR</a></li>
+<li><a href="#task-2---create-a-new-aks">Task 2 - Create a new AKS</a></li>
+</ul>
+</li>
+<li><a href="#exercise-2---build-the-bot">EXERCISE 2 - BUILD THE BOT</a>
+<ul>
+<li><a href="#task-1---clone-the-source-repo">Task 1 - Clone the source repo</a></li>
+<li><a href="#task-2---complete-the-code">Task 2 - Complete the code</a>
+<ul>
+<li><a href="#1-translation-middleware">1. Translation middleware</a></li>
+<li><a href="#2-create-the-language-selection-card">2. Create the language selection card</a></li>
+<li><a href="#3-keeping-track-of-the-user-state">3. Keeping track of the user state</a></li>
+</ul>
+</li>
+<li><a href="#task-3---build-and-run-the-bot">Task 3 - Build and Run the Bot</a></li>
+<li><a href="#task-4---test-the-bot">Task 4 - Test the Bot</a></li>
+</ul>
+</li>
+<li><a href="#exercise-3---create-and-deploy-the-containers">EXERCISE 3 - CREATE AND DEPLOY THE CONTAINERS</a>
+<ul>
+<li><a href="#task-1---create-and-run-the-containers">Task 1 - Create and run the containers</a></li>
+<li><a href="#optional-task-2---test-the-bot-in-the-container">[OPTIONAL] Task 2 - Test the Bot in the container</a></li>
+<li><a href="#task-3---deploy-the-containers-to-acr">Task 3 - Deploy the containers to ACR</a></li>
+</ul>
+</li>
+<li><a href="#exercise-4---configure-aks">EXERCISE 4 - CONFIGURE AKS</a>
+<ul>
+<li><a href="#task-1---create-a-new-service-in-aks">Task 1 - Create a new service in AKS</a></li>
+<li><a href="#task-2---configure-the-reverse-proxy">Task 2 - Configure the reverse proxy</a></li>
+<li><a href="#task-3---test-the-bot">Task 3 - Test the Bot</a></li>
+</ul>
+</li>
+<li><a href="#optional-exercise-5---publish-the-bot">[OPTIONAL] EXERCISE 5 - PUBLISH THE BOT</a>
+<ul>
+<li><a href="#task-1---create-the-bot-service">Task 1 - Create the Bot Service</a></li>
+<li><a href="#task-2---configure-the-aks-secrets">Task 2 - Configure the AKS secrets</a></li>
+<li><a href="#task-3---create-the-channels">Task 3 - Create the channels</a></li>
+</ul>
+</li>
+<li><a href="#epilogue">EPILOGUE</a></li>
+</ul>
+<h2 id="introduction">INTRODUCTION</h2>
+<h3 id="estimated-time">Estimated time</h3>
+<p>The lab was designed and tested in order to take at most <strong>120 minutes</strong> for attendees aiming at 100% completion (optional tasks excluded).<br>
+However, some of the tasks may vary in duration based on unpredictable external factors (mainly networking and Azure deployment operations).</p>
+<p>Not to worry though! In the unlikely event you won’t be able to complete all the lab exercises, we’ll share all the details on where to find the lab documentation and exercises at any future point!</p>
+<h3 id="objectives">Objectives</h3>
+<p>After completing this lab, you will be better at:</p>
+<ul>
+<li>Building an intelligent Bot using the Microsoft Bot Framework v4 SDK</li>
+<li>Using Microsoft Translator API to add real-time translation skills to your Bot</li>
+<li>Understanding the basic architecture of conversations in the Microsoft Bot Framework</li>
+<li>Using the Bot Framework Emulator to test your Bot</li>
+<li>Understanding the basic architecture of a ASP<a href=""></a>.NET Core Web Api app</li>
+<li>Creating a container image using Docker client</li>
+<li>Deploying a container image to Azure Container Registry</li>
+<li>Creating an Azure Kubernetes Service to host and manage containerized micro-services apps</li>
+<li>Create an Azure Bot Service and publish your bot to several channels</li>
+</ul>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>This document is designed to walk you through the whole lab and provide you with the necessary information to cover the main session takeaways. However, to take the most out of the lab you are recommended to have:</p>
+<ul>
+<li>Good knowledge of the Azure Portal</li>
+<li>Introductory knowledge of ASP<a href=""></a>.NET Core</li>
+<li>Introductory knowledge of Docker and containers</li>
+<li>Basic understanding of the Azure Bot Service architecture</li>
+<li>Basic understanding of micro-services architecture design</li>
+<li>Introductory knowledge of Kubernetes or other orchestration services</li>
+</ul>
+<h3 id="lab-overview">Lab Overview</h3>
+<p>The lab consists of 4 exercises, to be completed in sequential order.</p>
+<ol>
+<li>
+<p>You will create all the necessary resources on Azure. Namely an Azure Container Registry (ACR) and an Azure Kubernetes Service (AKS).</p>
+<p>Expected time to complete: <strong>15 minutes</strong></p>
+</li>
+<li>
+<p>You will build a v4 chat Bot that depends on a services API app. Then, you will add translation services to it. Eventually, you will test the Bot locally using the Bot Framework Emulator.</p>
+<p>Expected time to complete: <strong>30 minutes</strong></p>
+</li>
+<li>
+<p>You will create two containers to host the core Bot application and the services API it consumes. Then, you will upload the containers to the ACR and eventually create a Kubernetes workload in AKS to deploy and host the containers in two Kubernetes services.</p>
+<p>Expected time to complete: <strong>30 minutes</strong></p>
+</li>
+<li>
+<p>You will create an Azure Bot Service to publish your Bot hosted on AKS using the DirectLine and Skype channels.</p>
+<p>Expected time to complete: <strong>30 minutes</strong></p>
+</li>
+</ol>
+<h3 id="solution-architecture">Solution Architecture</h3>
+<p>Upon completing this lab you will have implemented a solution similar to the following:<br>
+<img src="img/solutionArchitecture.png" alt="solutionArchitecture"></p>
+<h3 id="computers-in-this-lab">Computers in this lab</h3>
+<p>You need to use just one Virtual Machine, running Windows 10 and <em>Docker for Windows</em>. The VM settings are reported in the table below. Before you begin the lab, please make sure the VM is started and you are logged on using the credentials provided below:</p>
+
+<table>
+<thead>
+<tr>
+<th>Username</th>
+<th>Password</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ready19</td>
+<td>ReadyPassword!</td>
+</tr>
+</tbody>
+</table><h2 id="getting-things-ready">GETTING THINGS READY</h2>
+<p>To get started you will need:</p>
+<ul>
+<li>
+<p>an <strong>Azure subscription</strong></p>
+<p>You can use your own or use the Azure Credentials provided with this lab (more info on the right ribbon of the main lab screen)</p>
+</li>
+<li>
+<p>one <strong>Container Registry</strong> (ACR)</p>
+</li>
+<li>
+<p>one <strong>Azure Kubernetes Service</strong> (AKS)</p>
+</li>
+<li>
+<p>Docker client with the <strong>Docker CLI</strong> installed</p>
+</li>
+<li>
+<p>The <strong>Azure CLI</strong> installed</p>
+</li>
+</ul>
+<p>Once identified the Azure Subscription to use, please open a browser on the VM and <strong>login to the Azure Portal</strong> (<a href="#">http://portal.azure.com</a>).</p>
+<h2 id="exercise-1---azure-setup">EXERCISE 1 - AZURE SETUP</h2>
+<h3 id="task-1---create-a-new-acr">Task 1 - Create a new ACR</h3>
+<p>Once logged in to the Azure portal, create a new resource of type <strong>Container Registry</strong>:</p>
+<p><img src="img/1.1-newACR.png" alt="newACR"></p>
+<p>Confirm selecting <strong>Create</strong> on the outer blade.</p>
+<p>Fill in the required information in the new blade:</p>
+<ul>
+<li><strong>Registry Name</strong>: a unique name for your ACR. You can pick one of your choice but an easy name is recommend (hint: <strong><code>youralias</code></strong><code>ACR</code>)</li>
+<li><strong>Resource Group</strong>: you can create a new one or pick an existing of your choice</li>
+<li><strong>Location</strong>: select <em>West US</em> for lower latency</li>
+<li><strong>Admin User</strong>: <em>Disabled</em></li>
+<li><strong>SKU</strong>: <em>Standard</em></li>
+</ul>
+<p>The form should resemble the following:</p>
+<p><img src="img/1.1-newACRform.png" alt="newACRdetails"></p>
+<p>Hit <strong>Create</strong> to start the deployment.</p>
+<p>It may take a few minutes for the new ACR to be fully deployed. Once done, you will be notified in the Azure Portal.</p>
+<p><strong>Let the deployment run and move on to the next task.</strong></p>
+<h3 id="task-2---create-a-new-aks">Task 2 - Create a new AKS</h3>
+<p>In the Azure Portal, create a new resource of type <strong>Kubernetes Service</strong>:</p>
+<p><img src="img/1.2-newAKS.png" alt="newAKS"></p>
+<p>Confirm selecting <strong>Create</strong> on the outer blade.</p>
+<p>The setup of AKS requires a few steps:</p>
+<ol>
+<li>
+<p>Fill in the first tab (<em>Basic</em>) as follows:</p>
+<ul>
+<li><strong>Resource Group</strong>: select the same resource group used before</li>
+<li><strong>Kubernetes cluster name</strong>: select a friendly name for your AKS cluster (hint: <strong><code>youralias</code></strong><code>AKS</code>)</li>
+<li><strong>Region</strong>: select <code>West US</code> for lower latency</li>
+<li><strong>Kubernetes version</strong>: leave the <em>default</em> (latest)</li>
+<li><strong>DNS name prefix</strong>: this is the DNS name prefix of your cluster, used when connecting to it for administration. Select one of your choice (hint: reuse the cluster name in lower letters)</li>
+<li><strong>Node size</strong>: click on <strong>Change size</strong> and select the <code>Standarb B2s</code> size <em>(2vcpus, 4GB memory)</em>. Your workload will be light enough to accomodate small node instances.</li>
+<li><strong>Node count</strong>: leave the <em>default</em> (<code>3</code> nodes)</li>
+<li><strong>Virtual nodes</strong>: <code>Disabled</code></li>
+</ul>
+<p>The form should look like this:<br>
+<img src="img/1.2-newAKSbasic.png" alt="newAKSbasics"></p>
+<p>Click <strong>Next: Authentication &gt;</strong> and proceed to the next tab.</p>
+</li>
+<li>
+<p>Make sure the <strong>Authentication</strong> section uses the defaults, shown below</p>
+<p><img src="img/1.2-newAKSauth.png" alt="newAKSauth"></p>
+<p>Click <strong>Next: Networking &gt;</strong> and proceed to the next tab.</p>
+</li>
+<li>
+<p>In the <strong>Networking</strong> section you need to <code>enable</code> <strong>HTTP Application Routing</strong>:</p>
+<p><img src="img/1.2-newAKSnet.png" alt="newAKSnet"></p>
+<p>Click <strong>Next: Monitoring &gt;</strong> and proceed to the next tab.</p>
+</li>
+<li>
+<p>The <strong>Monitoring</strong> section needs to have the <strong>Enable container monitoring</strong> flag switched to <code>No</code></p>
+<p><img src="img/1.2-newAKSmonitor.png" alt="newAKSmonitor"></p>
+</li>
+</ol>
+<p>You may now click on <strong>Review + create</strong> to review the AKS settings and hit <strong>Create</strong> to start the deployment.</p>
+<blockquote>
+<p>The <em><strong>Create</strong></em> button might be disabled for a few seconds while the AKS setup is being validated. Please be patient.</p>
+</blockquote>
+<p>You can regularly check on the AKS deployment by leaving the Azure page open:</p>
+<p><img src="img/1.2-newAKSdeployment.png" alt="newAKSdeploy"></p>
+<p>The deployment of the Kubernetes Service might take a while (<strong>between 5 to 10 minutes</strong>). While Azure deploys the cluster, please advance in the lab and move on to the <strong>Exercise 2</strong>.</p>
+<h2 id="exercise-2---build-the-bot">EXERCISE 2 - BUILD THE BOT</h2>
+<p>In this exercise you will clone a GitHub repo to get the base code of your Bot. You will have to complete the code to build the bot. Eventually, you will test the bot running on the dev VM.<br><br>
+You can find the code snippets used in this exercise in the <strong>CodeFile.cs</strong> file.</p>
+<h3 id="task-1---clone-the-source-repo">Task 1 - Clone the source repo</h3>
+<p>The base code to start building the bot is located at <a href="#">https://github.com/albigi/Ready19-RockTheBot</a>.<br>
+You can either connect to GitHub and download the code as a zip file, or clone the repository on your machine.</p>
+<p>To clone the repo, open the <strong>Code</strong> folder on the Desktop (any other folder of your choice would do!). While holding <strong>SHIFT</strong>, right click on the folder and select <strong>Git Bash here</strong>. The Git command prompt should appear.</p>
+<blockquote>
+<p>For this task you can also use a normal command prompt or powershell.</p>
+</blockquote>
+<p>Once the shell is open, type:</p>
+<pre><code>git clone https://github.com/albigi/Ready19-RockTheBot.git
+</code></pre>
+<p>In Explorer you should now see a folder named <strong>Ready19-RockTheBot</strong>. This is the main solution folder!<br>
+You will notice it contains two subfolders:</p>
+<ol>
+<li><strong>RockTheBot</strong> is the actual bot folder!</li>
+<li><strong>ServicesProviderWeb</strong> is a <em>service</em> ASP<a href=""></a>.NET Core Web API the bot relies on to access some of the data it needs. Its role will become clearer later in the exercises.</li>
+</ol>
+<p>Before moving forward, you should initialize the <strong>Azure CLI</strong>. In the main solution folder run the <strong>initialize.bat</strong> script and login to Azure using the same credentials you used in the previous exercise.</p>
+<blockquote>
+<p>In case you are using your own account to login to Azure and you have access to multiple subscriptions, the previous script will give you access to the <em>default subscription</em>. To switch subscriptions, you can use <code>az account set --subscription "SUB NAME OR ID"</code></p>
+</blockquote>
+<h3 id="task-2---complete-the-code">Task 2 - Complete the code</h3>
+<p>You will now start working on the actual bot code. This version of the code was slightly customized out of the default Azure Bot Service template. But don’t worry, you will be adding all the juicy details and customizations!</p>
+<blockquote>
+<p>If you try to compile the code as is, it won’t work. This is expected and you will have to complete it reading on.</p>
+</blockquote>
+<p>First, open the <strong>RockTheBot</strong> folder in Visual Studio Code: right click on the folder in Explorer and select <strong>Open with Code</strong>.</p>
+<blockquote>
+<p>At some point Visual Studio Code should prompt you to restore <em>unresolved dependencies</em> for the project: accept and click <strong>Restore</strong>.</p>
+</blockquote>
+<h4 id="translation-middleware">1. Translation middleware</h4>
+<p>The new Bot Framework v4 had the ASP<a href=""></a>.NET Core integration as one of its main goals. Actually, a v4 bot is nothing else than a ASP.()[]NET Core Web API with specialized middleware.<br><br>
+Indeed, middleware is one of the bonus aspects of the v4 SDK: expanding and customizing the bot functionality is now much easier.</p>
+<blockquote>
+<p>A middleware is a piece of code that is assembled into an app pipeline to handle requests and responses. Middlewares are executed one by one, in the order in which they are declared in the <strong>Startup.ConfigureServices()</strong> method.</p>
+</blockquote>
+<p>The bot relies on the <em>Translation Middleware</em> to translate user text. It reads the user’s preferred language from the user’s state and, if it is different from the default language (English), calls the <em>Microsoft Translator Text API</em> to translate from and to the user’s preferred language.<br>
+<br><br>
+This means the bot always receives utterances in English, while users can transparently interact using their preferred language.<br>
+Users can change their language preference anytime, and since this gets written to the user state, the middleware will read this state and instantly modify its behavior to honor the newly selected preferred language.</p>
+<p>The first step is to declare the translation middleware in the <strong>ConfigureServices</strong> method in the <strong>Startup.cs</strong> file.<br>
+Locate <strong>line 140</strong> which should look like this:</p>
+<pre class=" language-c"><code class="prism # language-c">var translator <span class="token operator">=</span> new <span class="token function">MicrosoftTranslator</span><span class="token punctuation">(</span>translatorKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>After defining the <strong>translator</strong> object and connecting it to the Translator API via the <strong>tranlator key</strong> we need to add the translation middleware to the API pipeline.<br>
+You need to complete the code by adding the lines below:</p>
+<pre class=" language-c"><code class="prism # language-c">var translationMiddleware <span class="token operator">=</span> new <span class="token function">TranslationMiddleware</span><span class="token punctuation">(</span>
+   translator<span class="token punctuation">,</span>
+   userState<span class="token punctuation">.</span>CreateProperty<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token string">"LanguagePreference"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+options<span class="token punctuation">.</span>Middleware<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>translationMiddleware<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<blockquote>
+<p>Remember you can find the missing code in the <strong>CodeFile.cs</strong> file.</p>
+</blockquote>
+<p>Notice the translation middleware is added simply by passing its instance to the <code>options.Middleware</code> object of the Bot SDK.</p>
+<h4 id="create-the-language-selection-card">2. Create the language selection card</h4>
+<p>Now the translation middleware is plugged-in, it is time to construct the card that lets the user select their language.</p>
+<blockquote>
+<p>If the bot’s response to the user needs to contain something other than text, we can use a card to display any combination of text, speech, images, buttons, and input fields. There are different types of cards, depending on what type of interaction you are designing for your bot.</p>
+</blockquote>
+<p>We have used a HeroCard as a simple way to present buttons to the user. The HeroCard allows us to create a list of suggested actions that will be shown to the user for a single turn of the conversation.</p>
+<p>In the <strong>RockTheBot.cs</strong> file, locate the <strong>SendLanguageCardAsync</strong> method:</p>
+<pre class=" language-c"><code class="prism # language-c">private <span class="token keyword">static</span> async Task <span class="token function">SendLanguageCardAsync</span><span class="token punctuation">(</span>ITurnContext turnContext<span class="token punctuation">,</span> CancellationToken cancellationToken<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+   var reply <span class="token operator">=</span> turnContext<span class="token punctuation">.</span>Activity<span class="token punctuation">.</span><span class="token function">CreateReply</span><span class="token punctuation">(</span><span class="token string">"Choose your language:"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   reply<span class="token punctuation">.</span>Attachments <span class="token operator">=</span> new List<span class="token operator">&lt;</span>Attachment<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   List<span class="token operator">&lt;</span>CardAction<span class="token operator">&gt;</span> cardButtons <span class="token operator">=</span> new List<span class="token operator">&lt;</span>CardAction<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   
+   <span class="token macro property"># TODO :  add the different actions for each language. </span>
+   <span class="token comment">//do something awesome here</span>
+
+   HeroCard heroCard <span class="token operator">=</span> new <span class="token function">HeroCard</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   <span class="token punctuation">{</span>
+      Buttons <span class="token operator">=</span> cardButtons<span class="token punctuation">,</span>
+   <span class="token punctuation">}</span><span class="token punctuation">;</span>
+   Attachment attachment <span class="token operator">=</span> heroCard<span class="token punctuation">.</span><span class="token function">ToAttachment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   reply<span class="token punctuation">.</span>Attachments<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>attachment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+   await turnContext<span class="token punctuation">.</span><span class="token function">SendActivityAsync</span><span class="token punctuation">(</span>reply<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>You should now complete the method and define what the <strong>HeroCard</strong> card should look like.</p>
+<blockquote>
+<p>Hint: you can peek at the implementation of a <em>HeroCard</em> for another user prompt in the method <strong>SendSuggestedActionsAsync</strong><br><br><br>
+The full code block is also available in the <strong>CodeFile.cs</strong> file.</p>
+</blockquote>
+<h4 id="keeping-track-of-the-user-state">3. Keeping track of the user state</h4>
+<p>If the bot is to send a welcome message every time a new user conversation starts, which is usually a desired feature, it needs to determine whether the message has already been sent. In addition, the bot needs to keep track of the users preferred language. Both of the above are typical situations where the bot state comes in handy.</p>
+<blockquote>
+<p>You can store and retrieve state data that is associated with a user, a conversation, or a specific user within the context of a specific conversation. State data can be used for many purposes, such as determining where the prior conversation left off or simply greeting a returning user by name.<br><br><br>
+Ideally, the bot state should persist the bot application lifetime. However that would require an out-of-memory external state provider (like a cache or a database).<br><br>
+For testing and prototyping purposes, you can use the Bot Builder Framework’s in-memory data storage, but for production bots, it is recommended to implement your own storage adapter or use one of the available Azure Extensions (Table Storage, CosmosDB, or Azure SQL).</p>
+</blockquote>
+<p>In the <strong>OnTurnAsync</strong> method in <strong>RockTheBot.cs</strong> a flag has to be set in case the user has already been welcomed. After setting the <code>DidBotWelcomeUser</code> flag you also need to update the state objects to <em>commit</em>  the state change so that it will be persisted. <br><br>
+The code needs to be added within the conditional statement to check whether the Activity we have received is of type Message, at <strong>line 80</strong></p>
+<pre class=" language-c"><code class="prism # language-c"> <span class="token keyword">if</span> <span class="token punctuation">(</span>turnContext<span class="token punctuation">.</span>Activity<span class="token punctuation">.</span>Type <span class="token operator">==</span> ActivityTypes<span class="token punctuation">.</span>Message<span class="token punctuation">)</span>
+ <span class="token punctuation">{</span>
+    <span class="token macro property"># TODO :</span>
+
+    <span class="token comment">//if our didBotWelcomeUser flag is set to false, set it to true </span>
+    <span class="token comment">// Update user state flag to reflect bot handled first user interaction.</span>
+
+ <span class="token punctuation">}</span>
+</code></pre>
+<p>You need to complete the code by adding the lines below:</p>
+<pre class=" language-c"><code class="prism # language-c">didBotWelcomeUser<span class="token punctuation">.</span>DidBotWelcomeUser <span class="token operator">=</span> true<span class="token punctuation">;</span>
+
+<span class="token comment">// Update user state flag to reflect bot handled first user interaction.</span>
+await _accessors<span class="token punctuation">.</span>WelcomeUserState<span class="token punctuation">.</span><span class="token function">SetAsync</span><span class="token punctuation">(</span>turnContext<span class="token punctuation">,</span> didBotWelcomeUser<span class="token punctuation">)</span><span class="token punctuation">;</span>
+await _accessors<span class="token punctuation">.</span>UserState<span class="token punctuation">.</span><span class="token function">SaveChangesAsync</span><span class="token punctuation">(</span>turnContext<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<blockquote>
+<p>Remember you can find the full code fragment in the <strong>CodeFile.cs</strong> file.</p>
+</blockquote>
+<p>Notice the <code>_accessors</code> object provides access to the different user states defined. In this case:</p>
+<ul>
+<li>The <code>WelcomeUserState</code> is used to persist information on sending the welcome message</li>
+<li>The <code>UserState</code> is the default state which is updated at every conversation turn</li>
+</ul>
+<h3 id="task-3---build-and-run-the-bot">Task 3 - Build and Run the Bot</h3>
+<p>Now that you are done editing the code, you need to make sure both applications actually compile and run.</p>
+<ol>
+<li>
+<p>Browse to the <strong>RockTheBot</strong> folder and open it in Visual Studio Code</p>
+</li>
+<li>
+<p>Select <em><strong>Debug &gt; Start Debugging</strong></em> (or hit F5)</p>
+<blockquote>
+<p>VS might prompt you to either download the <em>required assets</em> or select the debugging environment to use. Select <em>yes</em> in the former case or <em>.NET Core</em> in the latter.</p>
+</blockquote>
+</li>
+<li>
+<p>After a few seconds, you should see your bot is live!</p>
+<p><img src="img/2.3-botReady.png" alt="botReady"></p>
+<p>It is now time to run the services API too!<br>
+Leave the VS instance running and move back to the main code folder.</p>
+</li>
+<li>
+<p>Repeat the steps <code>1</code> and <code>2</code> but open the <strong>ServicesProviderWeb</strong> folder this time. You should have two instances of VS Code running at this point.</p>
+</li>
+<li>
+<p>In the new instance of VSCode press F5 and wait for the application to be online.</p>
+<blockquote>
+<p>If this is the first time you open this project, VS might warn you also this time:<br>
+<img src="img/2.3-requiredAssets.png" alt="requiredassets"></p>
+</blockquote>
+</li>
+<li>
+<p>The browser will open and show you a 404 page: this is OK as the API does not use any welcome page.</p>
+</li>
+<li>
+<p>To test the API is working fine, try to browse to <a href="#">http://localhost:5000/api/weather</a>. You should get a similar result:</p>
+<pre><code> {"Name":"Seattle","Country":"US","Description":"fog","Temperature":"9.4C (49F)"}
+</code></pre>
+</li>
+</ol>
+<p>At this stage, both applications are up and running!</p>
+<h3 id="task-4---test-the-bot">Task 4 - Test the Bot</h3>
+<p>While it is fairly easy to test the API, you cannot test the Bot application just using a browser.</p>
+<p>The <strong>Bot Framework Emulator</strong> is a troubleshooting application designed to help you test and debug your Bot.</p>
+<ol>
+<li>
+<p>Open the main code folder then browse to <em>RockTheBot &gt; RockTheBot</em> and double click the file <em><strong>RockTheBot.bot</strong></em></p>
+</li>
+<li>
+<p>The Bot Framework Emulator (BFE) will open and automaically connect to the <em>development</em> endpoint</p>
+</li>
+<li>
+<p>If the endpoint is correct and the bot is up and running, you should see the Bot’s welcome message:</p>
+<p><img src="img/2.4-bfe.png" alt="bfe"></p>
+</li>
+<li>
+<p>Select your favorite language and ask the Bot for the MSFT Stock value or the current weather</p>
+</li>
+<li>
+<p>You should get a similar output</p>
+<p><img src="img/2.4-bfestocks.png" alt="bfestocks"></p>
+</li>
+</ol>
+<p><strong>That's great! The Bot and API are working!</strong></p>
+<h2 id="exercise-3---create-and-deploy-the-containers">EXERCISE 3 - CREATE AND DEPLOY THE CONTAINERS</h2>
+<p>In this exercise you will create two containers using Docker, then upload them to the Container Registry and configure AKS to deploy them.</p>
+<h3 id="task-1---create-and-run-the-containers">Task 1 - Create and run the containers</h3>
+<p>Stop both the Bot and API apps in case they are still running.</p>
+<blockquote>
+<p>You can either stop debugging in VS Code or close the VS Code instances.<br><br>
+<img src="img/3.1-stopdbg.png" alt="stopdbg"></p>
+</blockquote>
+<p>Now open the main code folder and browse to the directory <em>RockTheBot</em>. Right-click the file <strong>build.bat</strong> and select <em>Open with Code</em>.<br>
+Inspect the build file:</p>
+<pre><code>@ECHO OFF
+set dir=rockthebot
+cd %dir%
+dotnet publish -c Release -o ..\bin\Release\
+
+cd ..\
+docker stop %dir%
+docker rm %dir%
+docker build -t %dir% .
+docker run -d -p 80:80 --name %dir% %dir%
+</code></pre>
+<p>This file essentially accomplishes two tasks:</p>
+<ol>
+<li>
+<p>It produces the production build of the Bot:</p>
+<blockquote>
+<p>dotnet publish -c Release -o …\bin\Release\</p>
+</blockquote>
+</li>
+<li>
+<p>It creates a new container image named <code>rockthebot</code> and starts a new container instance with the same name to host it. Notice the container is exposing the <em><strong>TCP port 80</strong></em> as the production build of the Bot listens on the default HTTP port.</p>
+<blockquote>
+<p>docker build -t %dir% .<br><br>
+docker run -d <code>-p 80:80</code> --name %dir% %dir%</p>
+</blockquote>
+</li>
+</ol>
+<p>Before running the build file, you can peek at the <strong>DockerFile</strong> in the same directory. This file is used by Docker to build the image.</p>
+<pre><code>FROM microsoft/aspnetcore:2.0
+
+# Copy the app
+WORKDIR /app/
+COPY ./bin/Release/ .
+
+EXPOSE 80
+
+CMD ["dotnet", "./RockTheBot.dll"]
+</code></pre>
+<p>The container build processs is fairly simple:</p>
+<ol>
+<li>
+<p>It uses a <em>base image</em> called <code>microsoft/aspnetcore:2.0</code> which is publicly available from <em>Docker Hub</em>: <a href="#">https://hub.docker.com/r/microsoft/aspnetcore/tags</a>. <br><br>
+This is a basic image with the <strong>dotnet runtime 2.0</strong> installed.</p>
+<blockquote>
+<p>It is important the base image matches the runtime your app is using, which is defined in the <em>project file</em>.<br><br>
+To verify what runtime the Bot application is using, you can open the file <em>RockTheBot\RockTheBot.csproj</em> and inspect the <strong>TargetFramework</strong> property defined at line 4: <code>netcoreapp2.0</code></p>
+</blockquote>
+</li>
+<li>
+<p>On top of the base image, it copies the <strong>application binaries</strong> from the local computer into the <em>/app/</em> folder in the container.<br><br>
+This means the Bot runs in the container within a folder named <em>app</em>.</p>
+</li>
+<li>
+<p>It exposes the <strong>TCP port 80</strong> of the container. This means the container application listening on that port is reachable from outside of the container itself.</p>
+</li>
+<li>
+<p>It sets the <strong>command</strong> to execute when the container image is launched. This essentially defines what operation the container performs trhoughout its instances lifecycles.<br></p>
+<blockquote>
+<p><code>CMD ["dotnet", "./RockTheBot.dll"]</code> runs the dotnet runtime to host the Bot application</p>
+</blockquote>
+</li>
+</ol>
+<p>It is now time to run the build file:</p>
+<ol>
+<li>
+<p>Browse to the <em>RockTheBot</em> folder and double click on the <strong>build</strong> file. A command propt appears and upon script execution you should see a similar output:</p>
+<pre><code>RockTheBot -&gt; C:\Users\Ready19\Desktop\Code\Ready19-RockTheBot\RockTheBot\RockTheBot\bin\Release\netcoreapp2.0\RockTheBot.dll
+RockTheBot -&gt; C:\Users\Ready19\Desktop\Code\Ready19-RockTheBot\RockTheBot\bin\Release\
+Error response from daemon: No such container: rockthebot
+Error: No such container: rockthebot
+Sending build context to Docker daemon  48.76MB
+Step 1/5 : FROM microsoft/aspnetcore:2.0
+---&gt; db030c19e94b
+Step 2/5 : WORKDIR /app/
+---&gt; Running in da9a5ee8ee4f
+Removing intermediate container da9a5ee8ee4f
+---&gt; 7a7d783fb01b
+Step 3/5 : COPY ./bin/Release/ .
+---&gt; 711fe2aac907
+Step 4/5 : EXPOSE 80
+---&gt; Running in 01825cf9f8db
+Removing intermediate container 01825cf9f8db
+---&gt; b76d0cbd489c
+Step 5/5 : CMD ["dotnet", "./RockTheBot.dll"]
+---&gt; Running in fcb6b7086ba6
+Removing intermediate container fcb6b7086ba6
+---&gt; 55185675042e
+Successfully built 55185675042e
+Successfully tagged rockthebot:latest
+SECURITY WARNING: You are building a Docker image from Windows against a non-Windows Docker host. All files and directories added to build context will have '-rwxr-xr-x' permissions. It is recommended to double check and reset permissions for sensitive files and directories.
+311b279c14b8bdd2e33e861ec69c74cbaebe37e89fa9458c80309d3fe9dbe332
+Press any key to continue . . .
+</code></pre>
+<blockquote>
+<p>The error <em>No such container</em> is expected when you run the build process for the first time!</p>
+</blockquote>
+</li>
+<li>
+<p>Verify the command logged the following lines:</p>
+<blockquote>
+<p>RockTheBot -&gt; C:\Users\Ready19\Desktop\Code\Ready19-RockTheBot\RockTheBot\bin\Release\</p>
+</blockquote>
+<p>This means the Bot was built successfully.</p>
+<blockquote>
+<p>Successfully built 55185675042e<br>Successfully tagged rockthebot:latest</p>
+</blockquote>
+<p>This means the container image was also built successfully.</p>
+</li>
+<li>
+<p>Verify a docker container named <strong>rockthebot</strong> is running: open VS Code and click on the <em>docker extension tab</em> on the left ribbon. Then, in the outer blade, expand the <strong>Containers</strong> collection and you should see the container is marked as green (running):<br><br>
+<img src="img/3.1-containerRunning.png" alt="containerRunning"></p>
+<blockquote>
+<p>You can list the running containers using <strong>Docker CLI</strong>:<br>
+open a command prompt or Powershell and type <code>docker ps</code>.</p>
+</blockquote>
+</li>
+<li>
+<p>You can now repeat the steps <code>1</code> to <code>3</code> for the <em>ServicesProviderWeb</em> folder. The build process is exactly alike the previous one.</p>
+<blockquote>
+<p>You will notice the <strong>build</strong> command takes longer to run for <em>ServicesProviderWeb</em>. This is expected as the API application runs with the <strong>dotnet runtime 2.2</strong> which needs to be installed in the container.</p>
+</blockquote>
+<p>As a result, both containers should be up and running:<br><br>
+<img src="img/3.1-bothContainers.png" alt="bothContainersRunning"></p>
+<blockquote>
+<p>You may notice the <em>ServicesProviderWeb</em> container is marked as <strong>created</strong>. This means the container is <strong>not</strong> actually <strong>running</strong>. This is expected: Docker cannot bind to port 80 as the Bot container is already using it!</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="optional-task-2---test-the-bot-in-the-container">[Optional] Task 2 - Test the Bot in the container</h3>
+<p>Now both the Bot and the API were published in two separate containers, it’s important to remark you cannot run both containers at the same time because of the port conflict explained earlier. Therefore, you could only test one containerized app at a time.</p>
+<blockquote>
+<p>Actually you could run the two containers at the same time by mapping the <em>ServicesProviderWeb</em> container port to a different one. This is very similar to the <em>NAT</em> concept of the IP networks and can be achieved by running the command:<br><br>
+<code>docker run -d -p 5000:80 --name servicesproviderweb5000 servicesproviderweb</code><br><br>
+However, the Bot would still be unable to call the <em>servicesproviderweb</em> endpoint as a result of the apps running in separate containers and, thus, isolated from one another.<br></p>
+</blockquote>
+<blockquote>
+<p>There are more articulated ways of solving this problem but they woult be out of scope for this lab.</p>
+</blockquote>
+<p>If you built the Bot application first, <em>RockTheBot</em> should be the container running. You can test the Bot using the <strong>Bot Framework Emulator</strong> repeating the same steps done earlier (Exercise 2.4) but using the <strong>production endpoint</strong> this time:</p>
+<p><img src="img/3.2-bfeProd.png" alt="bfeProd"></p>
+<blockquote>
+<p>In case you are unable to connect to the Bot (no welcome message is displayed and if you try to type a message you get the error <em><strong>couldn’t send. retry</strong></em>), this could be a bug in the Emulator. To sort it out make sure the Bot Framework Emulator is setup as follows:<br><br><br>
+a. Click on the settings gear, bottom left:<br><br>
+<img src="img/3.2-bfeSettings.png" alt="bfeSettings"><br><br>
+b. Make sure the Emulator is set to use <strong>ngrock</strong> for local addresses (bypass must be <strong>disabled</strong>)<br><br>
+<img src="img/3.2-bfeSetup1.png" alt="bfeSetup1"><br><br>
+c. Type <code>localhost</code> in the *<strong>localhost override</strong> field. Delete it in case it was already populated. <br><br>
+d. Save the settings, close the settings tab and restart the conversation <br><br>
+<img src="img/3.2-bfeRestart.png" alt="bfeRestart"><br><br><br>
+The Bot welcome message should now appear.</p>
+</blockquote>
+<h3 id="task-3---deploy-the-containers-to-acr">Task 3 - Deploy the containers to ACR</h3>
+<p>Once both the Bot and the API apps are containerized, the next step is to publish them to an online registry. <em>Docker Hub</em>, from where you downloaded the base images for your containers, is an example of a public registry.</p>
+<p>For Azure workloads, the <em>Azure Container Registry</em> service can be used to host container images.<br>
+ACR is a private registry and requires authenticated access.</p>
+<p>In order to publish a container image to any container repository service, the first step is to <em><strong>tag</strong></em> it accordingly.</p>
+<blockquote>
+<p>The tag, in the context of a container image, is both a labling and versioning identifier. Typically an image name consists of 3 parts:<br><br>
+<em><code>registryIdentifier/imageName:version</code></em><br><br><br>
+While the <em><code>version</code></em> tag can be omitted and defaults to <em><strong>latest</strong></em>, the <em><code>registry identifier</code></em> must exist in order for a docker image to be <em>pushed</em> to a remote registry.</p>
+</blockquote>
+<p>Once the image is tagged, it can be <em>pushed</em> to the registry using the <em>Docker CLI</em>.</p>
+<ol>
+<li>
+<p>In the previous tasks you created two images: <em>rockthebot</em> and <em>servicesproviderweb</em>. If you open VS Code and inspect the <em>Docker: Explore</em> panel expanding the <em>Images</em> list you will see both images lack a registry identifier.</p>
+<p><img src="img/3.3-dockerImgs.png" alt="deImgs"></p>
+<blockquote>
+<p>You can also ispect the output of the command<br><br>
+<em><code>docker image ls</code></em></p>
+</blockquote>
+</li>
+<li>
+<p>To find the right <em>registry identifier</em> to use, browse to the <strong>Azure Portal</strong>: <a href="#">https://portal.azure.com</a></p>
+<p>Select the <em>Azure Container Registry</em> you created in the first exercise: <em><strong>yourAliasACR</strong></em>. In the overview panel, copy the <em><strong>Login server</strong></em> property:</p>
+<p><img src="img/3.3-acrLoginServer.png" alt="acrProp"></p>
+<p><code>youraliasacr.azurecr.io</code> is the <em><strong>registry identifier</strong></em> to use.</p>
+</li>
+<li>
+<p>It is now time to tag the container image.</p>
+<ul>
+<li>Open VS Code and click on the <em>Docker: Explorer</em> extension button</li>
+<li>Expand the <em>Images</em> list and right-click on the first image to tag: <em><strong>rockthebot</strong></em></li>
+<li>Select <strong>Tag image</strong> and type <code>youraliasacr.azurecr.io/rockthebot</code> as tag</li>
+<li>Confirm with OK: a new image with the desired tag is added to the list</li>
+</ul>
+<p><img src="img/3.3-tagImage.png" alt="tagImage1"><br></p>
+<p><img src="img/3.3-tagImage2.png" alt="tagImage2"></p>
+<blockquote>
+<p>Alternatively, you can tag the image using the <em>Docker CLI</em> by running:<br><br>
+<code>docker tag rockthebot youraliasacr.azurecr.io/rockthebot</code></p>
+</blockquote>
+</li>
+<li>
+<p>Once the image is properly tagged, it is ready to be pushed to the remote registry.</p>
+<ul>
+<li>Open a new Powershell or command prompt and type:<br><br>
+<code>az acr login --name youraliasacr</code></li>
+<li>If you previously authenticated to Azure, you should see <em><strong>Login Succeeded</strong></em>. Alternatively, follow the login prompt until the command returns.</li>
+<li>At this time, Docker is authenticated to ACR and the images can be pushed to the registry.</li>
+<li>In Powershell or the command prompt type:<br><br>
+<code>docker push youraliasacr[]().azurecr.io/rockthebot</code></li>
+<li>The operation might take a while to complete and you should see the progress in the command output:<pre><code>The push refers to repository [albigiready19acr.azurecr.io/rockthebot]
+4ac7f152bb98: Pushed
+79a0035d08aa: Pushed
+c2734b0f7482: Pushing [=======&gt;                                           ]  21.86MB/154MB
+027f3db1c2f7: Pushing [==================================================&gt;]  8.014MB
+f0296b566559: Pushing [==================&gt;                                ]  16.03MB/43.75MB
+3c816b4ead84: Waiting
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>Eventually tag the container image <em><strong>servicesproviderweb</strong></em> with <code>youraliasacr.azurecr.io/servicesproviderweb</code> and push it to ACR repeating the previous steps from <code>3</code> to <code>5</code>.</p>
+</li>
+</ol>
+<p>By this time, both container images should be uploaded to the ACR registry. Browse to the <strong>Azure Portal</strong> and inspect the ACR resource blade. You should see both images listed within the <em><strong>Repositories</strong></em> section:</p>
+<p><img src="img/3.3-repos.png" alt="repos"></p>
+<h2 id="exercise-4---configure-aks">EXERCISE 4 - CONFIGURE AKS</h2>
+<p>In this exercise you will configure AKS to pull the container images from ACR and create the services cluster. Eventually, you will test the Bot running in AKS.</p>
+<h3 id="task-1---create-a-new-service-in-aks">Task 1 - Create a new service in AKS</h3>
+<p>Kubernetes can be managed via a command line interface, named <code>kubectl</code>, which also exposes a web UI for easier management.</p>
+<ol>
+<li>
+<p><strong>kubectl</strong> should be already available on your system. Open a new Powershell and make sure it is available by typing:<br><br>
+<code>Get-Command kubectl</code></p>
+</li>
+<li>
+<p>Should <strong>kubectl</strong> not be available, you can install it by running<br><br>
+<code>az aks install-cli</code></p>
+</li>
+<li>
+<p>The very next step is to authorize your remote cluster for management by the local instance of <strong>kubectl</strong>. In the Powershell window type:<br><br>
+<code>az aks get-credentials --resource-group</code> <em><code>yourRGname</code></em> <code>--name</code> <em><code>yourAKSname</code></em><br><br>
+You can lookup both the <em>AKS</em> name and the <em>Resource Group</em> it belongs to by opening the <strong>Azure Portal</strong> and opening the AKS resource from the <em>all resources</em> view<br></p>
+<p><img src="img/4.1-listaks.png" alt="akslist"></p>
+<p>After running the command you should get a confirmation message:</p>
+<pre><code>Merged "youraliasaks" as current context in C:\Users\Ready19\.kube\config
+</code></pre>
+</li>
+<li>
+<p>Now <strong>kubectl</strong> is ready and connected to your cluster. You are ready to explore the GUI. In Powershell run:<br><br>
+<code>az aks browse --resource-group</code> <em><code>yourRGname</code></em> <code>--name</code> <em><code>yourAKSname</code></em><br><br>
+Wait a few seconds for the proxy to be online and the browser to open the Kubernetes UI.</p>
+<blockquote>
+<p><code>az aks browse</code> connects you to your cluster and provides a graphical management interface. The connection to the cluster might become stale after a while: <strong>if you notice the UI stops refreshing or responding, make sure to terminate the command and run it again</strong>.</p>
+</blockquote>
+</li>
+<li>
+<p>AKS automatically deploys some <em>services</em> to the cluster. One of those is the <em>kubernetes</em> service which will be listed in the available services.</p>
+<blockquote>
+<p>Actually AKS deploys many other services in different namespaces. You can think of namespaces as groups of services, isolated from one another. This is more of a logical grouping rather than a physical one, since services from different namespaces can be deployed to the same cluster nodes.<br><br>
+For further information on services, pods, nodes and namespaces you can check the Kubernetes docs.</p>
+</blockquote>
+</li>
+<li>
+<p>Before deploying the containers to the cluster, you need to grant AKS the required permissions to pull container images from your Container Registry.</p>
+<ol>
+<li>Browse to the <strong>Azure Portal</strong> and select your <strong>ACR</strong> instance: <code>youraliasACR</code></li>
+<li>Select <strong>Access control (IAM)</strong> and then click on <strong>Add &gt; New Role Assignment</strong></li>
+<li>A new blade opens; select:
+<ul>
+<li><strong>Role</strong>: <code>ACRPull</code></li>
+<li><strong>Assign access to</strong>: <code>Azure AD user, group or service principal</code></li>
+<li><strong>Select</strong>: you need to pick the <em>service principal</em> linked to your AKS instance. The default name would be in the form <code>youraliasaks</code><strong><code>SP-</code></strong><em><code>DateOfCreation</code></em></li>
+</ul>
+</li>
+<li>The AKS service principal is now listed into the <em>Role Assignment</em> tab</li>
+</ol>
+<p><img src="img/4.1-acrSP.png" alt="acrSP"></p>
+</li>
+<li>
+<p>Both container images app are now ready to become a new service in the cluster. For these services, we can use the <em>default namespace</em>.</p>
+<p>In the Kubernetes UI click on the <em><strong>Create</strong></em> button, top right of the screen.</p>
+<p>You can either enter a <em>YAML</em> file or create a new service manually. Create a new service at this time: select <strong>Create an app</strong>. Fill in the form as follows:</p>
+<ol>
+<li>
+<p><strong>App name</strong>: <code>rockthebot</code></p>
+</li>
+<li>
+<p><strong>Container image</strong>: full image tag of the container, e.g: <code>youraliasacr.azurecr.io/rockthebot</code></p>
+</li>
+<li>
+<p><strong>Number of pods</strong>: select 3</p>
+<blockquote>
+<p>Pods are the smallest unit of work in a Kubernetes cluster. They represent the single application instances running and can be in most cases associated to the number of containers being deployed.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>Service</strong>: set it to <code>Internal</code> as the Bot should not be directly published on the Internet.</p>
+</li>
+<li>
+<p><strong>Port mapping</strong>: Both <em>Port</em> and <em>Target port</em> must be <code>80</code> (default HTTP port) as exposed by the container.</p>
+</li>
+<li>
+<p>Confirm by hitting <strong>Create</strong> at the bottom of the screen.</p>
+</li>
+</ol>
+<blockquote>
+<p>Be aware that Pods are distinct instances of the container. You should plan for a shared way to manage state if your services are stateful.</p>
+</blockquote>
+</li>
+<li>
+<p>To deploy the services API, you can repeat the previous steps and <strong>make sure to call the new service <code>servicesproviderweb</code> and pull the image <code>albigiready19acr.azurecr.io/servicesproviderweb</code></strong>.<br><br>
+This is important as this name is used by the internal AKS DNS service to map a service name to its Pods.</p>
+<p>The <strong>servicesproviderweb</strong> service to be deployed should resemble the following configuration:</p>
+<p><img src="img/4.1-servicesDeploy1.png" alt="serviceConfig"></p>
+</li>
+<li>
+<p>You have now created two <em>services</em> named <strong>rockthebot</strong> and <strong>servicesproviderweb</strong> in your AKS. Two <em>deployments</em> with the same name are also available and you can check on their status by inspecting the Kubernetes UI dashboard or simply by running <code>kubectl get deployment</code>.</p>
+<p><img src="img/4.2-kubeDeployment.png" alt="kubeDeployment"></p>
+</li>
+</ol>
+<blockquote>
+<p>In Kubernetes a <strong>deployment</strong> is an objects defining a desired state for <em>Pods</em> and <em>ReplicaSets</em>. The <em>Deployment Controller</em> enforces the configuration defined in the deployments by changing the state at a controlled rate.<br><br>
+A typical scenario where deployments are useful is when a service needs to be updated (for instance, a newer image needs to be pulled from a container registry). The service deployment definition is changed and the Deployment Controller updates the Pods one by one in order to honor the replicas target. In such a way the service gets updated with no downtime and the new version is <em>rolled over</em> the previous.<br><br><br>
+To know more about deployments, consult the Kubernetes documentation.</p>
+</blockquote>
+<h3 id="task-2---configure-the-reverse-proxy">Task 2 - Configure the reverse proxy</h3>
+<p>At this stage both the bot and the service API are not publicly available and can only communicate within the AKS cluster.<br>
+<br><br>
+While the services API should not be exposed to the Internet, the bot must have a publicly available HTTPs endpoint in order to be published.</p>
+<p>You can expose a public endpoint for the bot by creating a reverse proxy in AKS. The reverse proxy should also expose a HTTPs endpoint in order for the Azure Bot Service to connect to it.</p>
+<p>There are several reverse proxy solutions that can be deployed in a container. However the <strong>nginx-ingress</strong> project, based on the popular Linux nginx web browser, is possibly the easiest to configure in a Kubernetes cluster.</p>
+<ol>
+<li>
+<p>First, you need to install the <strong>nginx ingress controller</strong> itself. Open a Powershell or command prompt and type the following commands</p>
+<pre><code>kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml
+</code></pre>
+<blockquote>
+<p>The two yaml files above are used to create a dedicated namespace in AKS, named <strong>ingress-nginx</strong> where all the nginx-related components and dependencies are installed.<br><br>
+You can inspect the two files to find out more: simply browse to the two URLs above.</p>
+</blockquote>
+</li>
+<li>
+<p>Once the actual reverse proxy is installed, you need to identify its public IP address:<br><br>
+<code>kubectl get service --namespace ingress-nginx</code></p>
+<p>Take note of the <strong>External-IP</strong> of the service, which is the public IP the reverse proxy is listening on.</p>
+<blockquote>
+<p>In case the <em>External-IP</em> shows as <strong>pending</strong>, wait a moment for Azure to deploy a new public IP resource to AKS, then try again.</p>
+</blockquote>
+</li>
+<li>
+<p>You now need to map the public IP of the reverse proxy to a DNS name:</p>
+<ol>
+<li>
+<p>Identify the public IP resource in Azure:<br><br>
+<code>az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, 'X.X.X.X')].[id]" --output tsv</code></p>
+<p>Where <em><strong>X.X.X.X</strong></em> is the public IP identified earlier.</p>
+<p>You should obtain a resource id like the following:</p>
+<pre><code>/subscriptions/907e9cd6-3895-4e23-9ddd-3b8fef8ee060/resourceGroups/MC_albigiready19_albigiready19aks_westus/providers/Microsoft.Network/publicIPAddresses/kubernetes-a0065c7942dc911e9a902c6e728c24c9
+</code></pre>
+<p>Take note of the trailing resource identifier, <strong>kubernetes-a0065c7942dc911e9a902c6e728c24c9</strong> in the example above.</p>
+</li>
+<li>
+<p>Open the Azure Portal and select <strong>All Resources</strong> from the menu. Then paste the partial IP identifier just found into the resource search box:</p>
+<p><img src="img/4.2-searchIP.png" alt="azSearchIp"></p>
+<p>Click on the resource of type <strong>Public IP address</strong> from the list and select <strong>Configuration</strong>:</p>
+<ul>
+<li>make sure the IP is marked as <strong>static</strong></li>
+<li>type the <strong>DNS label name</strong> you want to use for this IP (hint: <em><code>youralias</code></em><strong><code>rockthebot</code></strong>)</li>
+<li>take note of the exact DNS name used as you will use it later</li>
+<li>confirm the DNS name by clicking <strong>Save</strong></li>
+</ul>
+<p><img src="img/4.2-ipDns.png" alt="azIpDNS"></p>
+<blockquote>
+<p>The DNS name can be different from your AKS cluster name, it just needs to be unique.<br><br>
+In case you get a validation error, you may have picked a name which is already existing. Try using a different one.<br><br><br>
+You can also update the DNS name of an IP by using the Azure command line:<br><br>
+<code>az network public-ip update --ids &lt;FULL_PUBLIC_IP_RESOURCE_ID&gt; --dns-name "&lt;DNS_NAME&gt;"</code><br></p>
+</blockquote>
+</li>
+</ol>
+</li>
+<li>
+<p>Once the reverse proxy has a public IP with a DNS name linked to it, it can be resolved and reached from the Internet.<br>
+<br>However the bot still requires a SSL endpoint to be published which, in turn, requires a SSL certificate to be installed on the reverse proxy.</p>
+<p>You could obtain a certificate by asking a certification authority, but that would take some time and money.<br><br>
+Luckily it exists a non-profit project named <strong>LetsEncrypt</strong> <a href="#">https://letsencrypt.org/</a> which allows you to create SSL certificates for free using the <em>ACME</em> protocol.</p>
+<p>LetsEncrypt can be used in combination with a Kubernetes service named <strong>cert-manager</strong> in order to dynamically generate SSL certificates for the reverse proxy endpoints.</p>
+<ol>
+<li>
+<p>Start installing <strong>cert-manager</strong> in a dedicated Kubernetes namespace.<br><br>
+Run the batch file <code>install-cert-manager.bat</code> located in the main solution directory, specifically in the <strong>Ready19-RockTheBot &gt; yaml</strong> folder.<br><br>
+The batch file executes these commands:</p>
+<pre><code>kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/00-crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/cert-manager.yaml --validate=false
+
+kubectl apply -f create-cluster-issuer.yaml
+</code></pre>
+<p>Verify there are no errors in the script execution.</p>
+</li>
+<li>
+<p>In the <strong>Ready19-RockTheBot &gt; yaml</strong> folder, locate the file <code>create-routes.yaml</code> and edit it with a text editor (<em>right click on the file &gt; <strong>Edit with Notepad++</strong></em>).</p>
+<p>Edit <strong>line 12 and line 15</strong> and replace the placeholder <code>&lt;DNS NAME HERE&gt;</code> with the reverse proxy IP <strong>DNS name</strong> specified earlier.</p>
+<blockquote>
+<p>The resulting DNS name must be a FQDN name, meaning the Azure suffix (e.g: <em>.westus.cloudapp.azure.com</em>) must be <strong>included</strong>.</p>
+</blockquote>
+<p>The resulting file should look like this:</p>
+<pre><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+name: rockthebot-ingress
+annotations:
+   kubernetes.io/ingress.class: nginx
+   certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+   nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+tls:
+- hosts:
+   - albigiready19rockthebot.westus.cloudapp.azure.com
+   secretName: rockthebot-cert
+rules:
+- host: albigiready19rockthebot.westus.cloudapp.azure.com
+   http:
+      paths:
+      - path: /
+      backend:
+         serviceName: rockthebot
+         servicePort: 80
+</code></pre>
+<p>Save the file, open a command prompt or powershell in that directory and type:<br><br>
+<code>kubectl apply -f create-routes.yaml</code></p>
+</li>
+</ol>
+</li>
+<li>
+<p>If the previous steps were successful you should:</p>
+<ol>
+<li>
+<p>See a certificate was issued to the reverse proxy endpoint for the DNS name specified:<br>
+<br><code>kubectl describe certificate</code></p>
+<pre><code>Name:         rockthebot-cert
+Namespace:    default
+Labels:       &lt;none&gt;
+Annotations:  &lt;none&gt;
+API Version:  certmanager.k8s.io/v1alpha1
+Kind:         Certificate
+Metadata:
+Creation Timestamp:  2019-02-10T18:49:38Z
+Generation:          1
+Owner References:
+   API Version:           extensions/v1beta1
+   Block Owner Deletion:  true
+   Controller:            true
+   Kind:                  Ingress
+   Name:                  rockthebot-ingress
+   UID:                   9dd87140-2d64-11e9-a902-c6e728c24c92
+Resource Version:        2060488
+Self Link:               /apis/certmanager.k8s.io/v1alpha1/namespaces/default/certificates/rockthebot-cert
+UID:                     9dddb209-2d64-11e9-a902-c6e728c24c92
+Spec:
+Acme:
+   Config:
+      Domains:
+      albigiready19aks.westus.cloudapp.azure.com
+      Http 01:
+      Ingress:
+      Ingress Class:  nginx
+Dns Names:
+   albigiready19aks.westus.cloudapp.azure.com
+Issuer Ref:
+   Kind:       ClusterIssuer
+   Name:       letsencrypt-prod
+Secret Name:  rockthebot-cert
+Status:
+Conditions:
+   Last Transition Time:  2019-02-10T18:50:05Z
+   Message:               Certificate is up to date and has not expired
+   Reason:                Ready
+   Status:                True
+   Type:                  Ready
+Not After:               2019-05-11T17:50:04Z
+Events:                    &lt;none&gt;
+</code></pre>
+<blockquote>
+<p>The certificate private key is saved as a Kubernetes <strong>secret</strong> named <em>rockthebot-cert</em>.<br><br>
+In case the certificate is renewed or redeployed, the secret must be deleted first in order for the right key to be used.</p>
+</blockquote>
+</li>
+<li>
+<p>See an <em>ingress</em> was created for the <strong>rockthebot</strong> endpoint:<br>
+<code>kubectl get ingress</code></p>
+
+<table>
+<thead>
+<tr>
+<th>NAME</th>
+<th>HOSTS</th>
+<th>ADDRESS</th>
+<th>PORTS</th>
+<th>AGE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rockthebot-ingress</td>
+<td><a href="http://albigiready19aks.westus.cloudapp.azure.com">albigiready19aks.westus.cloudapp.azure.com</a></td>
+<td></td>
+<td>80, 443</td>
+<td>13h</td>
+</tr>
+</tbody>
+</table></li>
+<li>
+<p>Be able to browse to the <strong>DNS name</strong> of the bot using a web browser, using HTTPS without getting certificate warnings and seeing the bot welcome page:</p>
+<p><img src="img/4.3-surfToBot.png" alt="surftobot"></p>
+</li>
+</ol>
+<p>At this point, the bot is publicly reachable over HTTPS and it can be published using the Azure Bot Service!</p>
+</li>
+</ol>
+<h3 id="task-3---test-the-bot">Task 3 - Test the Bot</h3>
+<p>Before publishing the bot on the Azure Portal, you can test the bot and its services are properly working within AKS.</p>
+<p>Open the Bot Framework Emulator and load the <strong>RockTheBot.bot</strong> file. You will notice the new endpoint is not yet configured: click on the <strong><code>+</code></strong> icon to add a new endpoint definition.</p>
+<p><img src="img/4.3-test1.png" alt="addEndpoint"></p>
+<ul>
+<li>Type the <strong>full URL</strong> in the <strong>Endpoint URL</strong> field, making sure to include the <code>/api/messages</code> route suffix.</li>
+<li>Choose a friendly name of your choice for the endpoint.</li>
+<li>Click on <strong>Submit</strong></li>
+</ul>
+<p><img src="img/4.3-test2.png" alt="addEndpoint2"></p>
+<p>A new endpoint is now available in the Emulator. Double click on it to open a new conversation with the bot at the public endpoint.<br>
+You should be able to interact with the bot:</p>
+<p><img src="img/4.3-success.png" alt="success"></p>
+<blockquote>
+<p>One of the main reasons why people move their workloads to AKS is <strong>scaling</strong>. AKS allows you to easily scale your cluster up (larger node size) and out (deploying more nodes) without any service disruption. Whenever scaling occurs and new nodes are addedd or remove from the cluster, Kubernetes takes care of updating the cluster configuration in a way that no service downtime is experienced. In addition to scaling the cluster, individual deployments can also be scaled so that most demanding services can be assigned more resources with respect to lower demanding workloads.<br></p>
+</blockquote>
+<h2 id="optional-exercise-5---publish-the-bot">[OPTIONAL] EXERCISE 5 - PUBLISH THE BOT</h2>
+<p>In this exercise you will create a new Azure Bot Service to publish your AKS Bot on the Teams and Skype channels.</p>
+<p>Now that the bot is ready you can proceed to create the Azure Bot Service resource to link it to the channels you care for.</p>
+<h3 id="task-1---create-the-bot-service">Task 1 - Create the Bot Service</h3>
+<p>The very first step is to create the Azure Bot Service itself. Connect to the Azure Portal and create a new resource of type <strong>Bot Channels Registration</strong>. Configure the new resource as follows:</p>
+<ul>
+<li>
+<p><strong>Bot name</strong>: pick a unique name for the resource (hint: <code>youraliasRockTheBot</code>)</p>
+</li>
+<li>
+<p><strong>Subscription</strong> &amp; <strong>Resource group</strong>: leave the defaults for the account you are using</p>
+</li>
+<li>
+<p><strong>Location</strong>: <code>West US</code> for reduced latency</p>
+</li>
+<li>
+<p><strong>Pricing Tier</strong>: <code>S1</code></p>
+</li>
+<li>
+<p><strong>Messaging endpoint</strong>: here you need to provide the FQDN (full DNS name) of your messaging endpoint, including the messaging API route. This is the very same you used when testing the bot earlier and should be similar to <em><code>youralias</code></em><code>aks.westus.cloudapp.azure.com</code><strong><code>/api/messages</code></strong></p>
+</li>
+<li>
+<p><strong>Application Insights</strong>: <code>Off</code></p>
+</li>
+<li>
+<p><strong>Microsoft app ID and password</strong>: leave the default, <code>Auto create App ID and password</code></p>
+<p><img src="img/5.1-createABS.png" alt="createABS"></p>
+</li>
+<li>
+<p>Hit <strong>Create</strong> and wait until Azure deploys the resource (it should take less than a minute)</p>
+</li>
+</ul>
+<p>As soon as you get notified the new Bot Channels Registration resource is ready:</p>
+<ol>
+<li>Open the <strong>Azure Active Directory</strong> blade from the left menu bar:<br>
+<img src="img/5.1-azureAdblade.png" alt="azureAdblad"></li>
+<li>Select <strong>App registrations (preview)</strong></li>
+<li>Type your bot name into the search box and select the newly created bot<br>
+<img src="img/5.1-searchBot.png" alt="searchABS"></li>
+<li>Select <strong>Certificates &amp; secrets</strong>, then click <strong>New client secret</strong><br>
+<img src="img/5.1-newsecret.png" alt="newsecret"></li>
+<li>Input a description (can be any text) and leave the default expiration (1 year), then hit <strong>Add</strong></li>
+<li><strong>Make sure to copy the key now</strong> as you won’t be able to do it later on and a new key will have to be created (max 2 concurrent keys are allowed). Save the app key somewhere as you will need it later.<br>
+<img src="img/5.1-copyKey.png" alt="copykey"></li>
+<li>Click on <strong>Overview</strong> and take note of the <strong>Application (client) id</strong> too<br>
+<img src="img/5.1-copyappid.png" alt="copyappid"></li>
+</ol>
+<h3 id="task-2---configure-the-aks-secrets">Task 2 - Configure the AKS secrets</h3>
+<p>Next, you need to create a <strong>Kubernetes secret</strong> to store the app ID and password and expose it to the bot application via environment variables.</p>
+<ol>
+<li>
+<p>Open a powershell or command prompt and type:<br><br>
+<code>kubectl create secret generic absappregistration --from-literal=appId='&lt;YOUR APP ID&gt;' --from-literal=password='&lt;YOUR APP SECRET&gt;'</code><br>
+<br><br>
+Replace your app id and secret with the literal values copied in the previous step. The command to issue should look like the following:</p>
+<pre><code>kubectl create secret generic absappregistration --from-literal=appId='9510db6f-be2e-422f-9773-2103c3661095' --from-literal=password='{xIgZKJ@3$skb4vu{=|}v6$[k?R%7-sO[=C;U}dd(*0}m^'
+</code></pre>
+</li>
+<li>
+<p>To verify the secret was properly set in AKS, run:<br><br>
+<code>kubectl describe secret absappregistration</code><br><br>
+This should return a similar output:</p>
+<pre><code>Name:         absappregistration
+Namespace:    default
+Labels:       &lt;none&gt;
+Annotations:  &lt;none&gt;
+
+Type:  Opaque
+
+Data
+====
+appId:     36 bytes
+password:  46 bytes
+</code></pre>
+</li>
+<li>
+<p>Next step is to make the secret available to the Kubernetes Pods via environment variables. In a powershell or command prompt run:<br><br>
+<code>az aks get-credentials --resource-group</code> <em><code>yourRGname</code></em> <code>--name</code> <em><code>yourAKSname</code></em><br></p>
+<p>When the Kubernetes UI appears, click on the <strong>rockthebot deployment</strong> details and select <strong>View/edit YAML</strong><br>
+<img src="img/5.2-edityaml.png" alt="edityaml"></p>
+<p>Scroll down to <strong>line 37</strong> and locate the <strong>container name and image</strong> definitions. Add a new line afterwards and paste the following json text:</p>
+<pre class=" language-yaml"><code class="prism  language-yaml"><span class="token key atrule">"env"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+   <span class="token punctuation">{</span>
+      <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"_ROCKTHEBOTAPPID"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"valueFrom"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      <span class="token key atrule">"secretKeyRef"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+         <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"absappregistration"</span><span class="token punctuation">,</span>
+         <span class="token key atrule">"key"</span><span class="token punctuation">:</span> <span class="token string">"appId"</span>
+      <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+   <span class="token punctuation">}</span><span class="token punctuation">,</span>
+   <span class="token punctuation">{</span>
+      <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"_ROCKTHEBOTAPPPWD"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"valueFrom"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      <span class="token key atrule">"secretKeyRef"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+         <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"absappregistration"</span><span class="token punctuation">,</span>
+         <span class="token key atrule">"key"</span><span class="token punctuation">:</span> <span class="token string">"password"</span>
+      <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+   <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">,</span>
+</code></pre>
+<p>Be careful and pay attention to the commas. An invalid json text would invalidate the deployment.</p>
+<p>The resulting text should look like this:</p>
+<pre class=" language-yaml"><code class="prism  language-yaml"><span class="token key atrule">"spec"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+   <span class="token key atrule">"containers"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+      <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"rockthebot"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"image"</span><span class="token punctuation">:</span> <span class="token string">"youraliasacr.azurecr.io/rockthebot"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"env"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+         <span class="token punctuation">{</span>
+            <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"_ROCKTHEBOTAPPID"</span><span class="token punctuation">,</span>
+            <span class="token key atrule">"valueFrom"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            <span class="token key atrule">"secretKeyRef"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+               <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"absappregistration"</span><span class="token punctuation">,</span>
+               <span class="token key atrule">"key"</span><span class="token punctuation">:</span> <span class="token string">"appId"</span>
+            <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+         <span class="token punctuation">}</span><span class="token punctuation">,</span>
+         <span class="token punctuation">{</span>
+            <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"_ROCKTHEBOTAPPPWD"</span><span class="token punctuation">,</span>
+            <span class="token key atrule">"valueFrom"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            <span class="token key atrule">"secretKeyRef"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+               <span class="token key atrule">"name"</span><span class="token punctuation">:</span> <span class="token string">"absappregistration"</span><span class="token punctuation">,</span>
+               <span class="token key atrule">"key"</span><span class="token punctuation">:</span> <span class="token string">"password"</span>
+            <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+         <span class="token punctuation">}</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"resources"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"terminationMessagePath"</span><span class="token punctuation">:</span> <span class="token string">"/dev/termination-log"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"terminationMessagePolicy"</span><span class="token punctuation">:</span> <span class="token string">"File"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"imagePullPolicy"</span><span class="token punctuation">:</span> <span class="token string">"Always"</span><span class="token punctuation">,</span>
+      <span class="token key atrule">"securityContext"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+         <span class="token key atrule">"privileged"</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
+      <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+   <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">...</span>
+</code></pre>
+<p>Hit <strong>Update</strong> and wait a few moments as Kubernetes starts to update your Pods.</p>
+<p>You can monitor the update progress by refreshing the UI dashboard or regularly typing <code>kubectl get deployment rockthebot</code> in a powershell or command prompt.</p>
+<p>Once the update is complete all the Pods will be running the updated containers, which means the bot registration id and password is available to the bot app via the environment variables <strong>_ROCKTHEBOTAPPID</strong> AND <strong>_ROCKTHEBOTAPPPWD</strong>.</p>
+<blockquote>
+<p>Application registration secrets are required for the bot to authenticate to the Azure Bot Framework and <em>prove</em> it is really the bot application for which the channel registration is intended.<br><br>
+<br>Usually the app id and secret are added to the bot configuration file, however that would require to hardcode them upon deploying the app in the container image. To overcome this problem and take advantage of the Kubernetes secret, the bot code reads the app id and secret from the above mentioned environment variables.<br><br><br>
+Check the <strong>RockTheBot</strong> code at <strong>line 83</strong> of the <strong>Startup.cs</strong> file to double check!</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="task-3---create-the-channels">Task 3 - Create the channels</h3>
+<p>At this time the bot should be able to connect to its channel registrations. To verify everything is working, open the <strong>Azure Portal</strong> and browse to your <strong>Bot channels registation</strong> resource you created earlier.</p>
+<p>Select <strong>Test in Web Chat</strong> from the menu, wait for the bot authentication to complete and type some text to the bot: you should receive the bot’s welcome message!<br>
+<img src="img/5.3-testthebot.png" alt="testBot"></p>
+<p>As the very last step, you need to configure the <strong>Skype</strong> and <strong>Teams</strong> channels.</p>
+<ol>
+<li>In the <strong>Azure Portal</strong> browse to your <strong>Bot channels registation</strong> and select <strong>Channels</strong></li>
+<li>Click on <strong>Skype</strong> to configure a new Skype channel<br>
+<img src="img/5.3-addSkype.png" alt="configSkype">
+<blockquote>
+<p>If you originally created the Bot Channel Registration resource without providing an <em>endpoint URL</em> and configured it at a later time, you may notice the Skype channel is already available.</p>
+</blockquote>
+</li>
+<li>Switch to the <strong>Publish</strong> section and provide a bot description, then click <strong>Save</strong><br>
+<img src="img/5.3-configSkype.png" alt="skype"></li>
+<li>Agree to the <strong>Terms of service</strong>: the Skype channel is now listed among the available channels.</li>
+<li>In the channels section, click on the newly created <strong>Skype</strong> channel:<br>
+<img src="img/5.3-skype.png" alt="skype"></li>
+<li>After clicking on <strong>Add to contacts</strong> you are prompted to login on Skype. The bot is now added to your contacts.<br>
+<img src="img/5.3-addedSkype.png" alt="skypeadded"></li>
+<li>If you open Skype on your own device you should find the bot among your contacts and be able to chat with it.<br>
+<img src="img/5.3-skypechat.png" alt="chatskype"></li>
+<li>The <strong>Teams</strong> channel can be added from the <strong>Channels</strong> section in the <strong>Bot channels registration</strong> resource in the Azure Portal.
+<ul>
+<li>Click on the teams icon<br>
+<img src="img/5.3-addTeams.png" alt="addTeams"></li>
+<li>Confirm with <strong>Save</strong> and then <strong>Agree</strong> to the Terms of service</li>
+</ul>
+</li>
+<li>Going back to the <strong>Channels</strong> view you can now see the <strong>Teams</strong> channel is added and clickable. If you click on <strong>Teams</strong> a new browser window opens. This is the link to chat with the bot and you can either use Teams online or the Teams client to interact with it.<br>
+<img src="img/5.3-teamsChat.png" alt="teamschat"></li>
+</ol>
+<blockquote>
+<p>Unfortunately in Teams some features are not available. For instance, you cannot search the bot by name among your contacts. However if you follow the link and open a new conversation with the bot, you will have it in your <em>Chat</em> list for a later use.</p>
+</blockquote>
+<p>WELL DONE!</p>
+<hr>
+<h2 id="epilogue">EPILOGUE</h2>
+<p><strong>THANK YOU</strong></p>
+<p>Congratulations! You made it through the end!<br>
+Thank you for taking this lab!</p>
+<p>We enjoyed developing the lab and we sincerely hope it met your expectations!</p>
+<p><strong>LAB EVALUATION</strong></p>
+<p>Please take a minute to let us know what you think!<br>
+This is super important!  All of your comments, recommendations, suggestions or complaints are extremely important to us! Your satisfaction is the ultimate driver that motivates us to work harder and better for the next time!</p>
+</div>
+</body>
+
+</html>

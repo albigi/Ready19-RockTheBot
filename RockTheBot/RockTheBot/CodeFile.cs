@@ -10,7 +10,5 @@ cardButtons.Add(new MultilingualCardAction(language) { CardTitle = "Italian", Ty
 
 //3. Keeping track of the user state
 didBotWelcomeUser.DidBotWelcomeUser = true;
-
-// Update user state flag to reflect bot handled first user interaction.
 await _accessors.WelcomeUserState.SetAsync(turnContext, didBotWelcomeUser);
 await _accessors.UserState.SaveChangesAsync(turnContext);

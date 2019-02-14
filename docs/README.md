@@ -1,7 +1,13 @@
-# <p align="center"> Microsoft Ready 2019 <br/><br/> AI-APP-ST315 <br/><br/><br/><br/> Rock the Bot: build a highly scalable Bot using Bot Framework, ASP[]().NET Core and Kubernetes <br/><br/>
+<head>
+   <title>Ready19 - AI-APP-ST315</title>
+</head>
 
+<h1><p align="center"> Microsoft Ready 2019 <br/><br/> AI-APP-ST315 <br/><br/><br/><br/> Rock the Bot: build a highly scalable Bot using Bot Framework, ASP.NET Core and Kubernetes
+</h1>
+<h2>
 <p align="center">Alessandro Bigi (<b>albigi</b>)</p>
 <p align="center">Roxana Gheorghe (<b>rogheorg</b>)</p>
+</h2>
 
 ----------------- 
 
@@ -120,7 +126,7 @@ Once logged in to the Azure portal, create a new resource of type **Container Re
 Confirm selecting **Create** on the outer blade.
 
 Fill in the required information in the new blade:
-- **Registry Name**: a unique name for your ACR. You can pick one of your choice but an easy name is recommend (hint: **`yourAlias`**`ACR`)
+- **Registry Name**: a unique name for your ACR. You can pick one of your choice but an easy name is recommend (hint: **`youralias`**`ACR`)
 - **Resource Group**: you can create a new one or pick an existing of your choice
 - **Location**: select *West US* for lower latency
 - **Admin User**: *Disabled*
@@ -147,7 +153,7 @@ The setup of AKS requires a few steps:
 
 1. Fill in the first tab (*Basic*) as follows:
      - **Resource Group**: select the same resource group used before
-     - **Kubernetes cluster name**: select a friendly name for your AKS cluster (hint: **`yourAlias`**`AKS`)
+     - **Kubernetes cluster name**: select a friendly name for your AKS cluster (hint: **`youralias`**`AKS`)
      - **Region**: select `West US` for lower latency
      - **Kubernetes version**: leave the *default* (latest)
      - **DNS name prefix**: this is the DNS name prefix of your cluster, used when connecting to it for administration. Select one of your choice (hint: reuse the cluster name in lower letters)
@@ -189,7 +195,7 @@ You can regularly check on the AKS deployment by leaving the Azure page open:
 
 ## EXERCISE 2 - BUILD THE BOT ##
 <p style="border: 2px solid gray; padding: 5px">In this exercise you will clone a GitHub repo to get the base code of your Bot. You will have to complete the code to build the bot. Eventually, you will test the bot running on the dev VM.<br/><br/>
-You can find the code snippets used in this exercise in the <strong>CodeFile.csfile</strong>.</p>
+You can find the code snippets used in this exercise in the <strong>CodeFile.cs</strong> file.</p>
 
 ### Task 1 - Clone the source repo ###
 The base code to start building the bot is located at [https://github.com/albigi/Ready19-RockTheBot](#).
@@ -209,7 +215,7 @@ You will notice it contains two subfolders:
 1. **RockTheBot** is the actual bot folder!
 2. **ServicesProviderWeb** is a *service* ASP[]().NET Core Web API the bot relies on to access some of the data it needs. Its role will become clearer later in the exercises.
 
-Before moving forward, you should initialize the **Azure CLI**. In the main solution folder run the **initialize.bat** script and login to Azure using the same credentials you used in the previous exercise. 
+Before moving forward, you should initialize the **Azure CLI**. In the main solution folder right click on the **initialize.ps1** script and select **Run with Powershell**. The script will log you in to Azure: use the same credentials you used in the previous exercise. 
 
 >In case you are using your own account to login to Azure and you have access to multiple subscriptions, the previous script will give you access to the *default subscription*. To switch subscriptions, you can use `az account set --subscription "SUB NAME OR ID"`
 
@@ -1009,21 +1015,24 @@ Select **Test in Web Chat** from the menu, wait for the bot authentication to co
 As the very last step, you need to configure the **Skype** and **Teams** channels.
 
 1. In the **Azure Portal** browse to your **Bot channels registation** and select **Channels**
-2. You  will notice the **Skype** channel is added by default: if you click on it you can add the bot to your Skype contacts:
+2. Click on **Skype** to configure a new Skype channel
+   ![configSkype](img/5.3-addSkype.png)
+   >If you originally created the Bot Channel Registration resource without providing an *endpoint URL* and configured it at a later time, you may notice the Skype channel is already available.
+3. Switch to the **Publish** section and provide a bot description, then click **Save**
+   ![skype](img/5.3-configSkype.png)
+4. Agree to the **Terms of service**: the Skype channel is now listed among the available channels.
+5. In the channels section, click on the newly created **Skype** channel:
    ![skype](img/5.3-skype.png)
-3. After clicking on **Add to contacts** you are prompted to login on Skype. The bot is now added to your contacts.
+6. After clicking on **Add to contacts** you are prompted to login on Skype. The bot is now added to your contacts.
    ![skypeadded](img/5.3-addedSkype.png)
-4. If you open Skype on your own device you should find the bot among your contacts and be able to chat with it.
+7. If you open Skype on your own device you should find the bot among your contacts and be able to chat with it.
    ![chatskype](img/5.3-skypechat.png)
-
-5. The **Teams** channel can be added from the **Channels** section in the **Bot channels registration** resource in the Azure Portal.
+8. The **Teams** channel can be added from the **Channels** section in the **Bot channels registration** resource in the Azure Portal.
    - Click on the teams icon
       ![addTeams](img/5.3-addTeams.png)
    - Confirm with **Save** and then **Agree** to the Terms of service
-
-6. Going back to the **Channels** view you can now see the **Teams** channel is added and clickable. If you click on **Teams** a new browser window opens. This is the link to chat with the bot and you can either use Teams online or the Teams client to interact with it.
-
-   ![teamschat](img/5.3-teamsChat.png)
+9.  Going back to the **Channels** view you can now see the **Teams** channel is added and clickable. If you click on **Teams** a new browser window opens. This is the link to chat with the bot and you can either use Teams online or the Teams client to interact with it.
+    ![teamschat](img/5.3-teamsChat.png)
 
    >Unfortunately in Teams some features are not available. For instance, you cannot search the bot by name among your contacts. However if you follow the link and open a new conversation with the bot, you will have it in your *Chat* list for a later use.
 
