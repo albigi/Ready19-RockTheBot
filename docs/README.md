@@ -737,8 +737,8 @@ There are several reverse proxy solutions that can be deployed in a container. H
       LetsEncrypt can be used in combination with a Kubernetes service named **cert-manager** in order to dynamically generate SSL certificates for the reverse proxy endpoints.
 
    1. Start installing **cert-manager** in a dedicated Kubernetes namespace.<br/>
-   Run the batch file `install-cert-manager.bat` located in the main solution directory, specifically in the **Ready19-RockTheBot > yaml** folder.<br/>
-   The batch file executes these commands:
+   Run the powershell file `install-cert-manager.ps1` located in the main solution directory, specifically in the **Ready19-RockTheBot > yaml** folder.<br/>
+   The script executes these commands:
 
       ~~~
       kubectl create namespace cert-manager
@@ -751,7 +751,7 @@ There are several reverse proxy solutions that can be deployed in a container. H
 
       Verify there are no errors in the script execution.
 
-   2. In the **Ready19-RockTheBot > yaml** folder, locate the file `create-routes.yaml` and edit it with a text editor (*right click on the file > **Edit with Notepad++***).
+   1. In the **Ready19-RockTheBot > yaml** folder, locate the file `create-routes.yaml` and edit it with a text editor (*right click on the file > **Edit with Notepad++***).
    
       Edit **line 12 and line 15** and replace the placeholder `<DNS NAME HERE>` with the reverse proxy IP **DNS name** specified earlier.
 
