@@ -11,10 +11,10 @@
 <body class="stackedit">
   <div class="stackedit__html"><h1><p align="center"> Microsoft Ready 2019 <br><br> AI-APP-ST315 <br><br><br><br> Rock the Bot: build a highly scalable Bot using Bot Framework, ASP.NET Core and Kubernetes
 </p></h1>
-<h3>
+<h2>
 <p align="center">Alessandro Bigi (<b>albigi</b>)</p>
 <p align="center">Roxana Gheorghe (<b>rogheorg</b>)</p>
-</h3>
+</h2>
 <hr>
 <h2 id="contents">CONTENTS</h2>
 <ul>
@@ -242,7 +242,7 @@ You will notice it contains two subfolders:</p>
 <li><strong>RockTheBot</strong> is the actual bot folder!</li>
 <li><strong>ServicesProviderWeb</strong> is a <em>service</em> ASP<a href=""></a>.NET Core Web API the bot relies on to access some of the data it needs. Its role will become clearer later in the exercises.</li>
 </ol>
-<p>Before moving forward, you should initialize the <strong>Azure CLI</strong>. In the main solution folder run the <strong>initialize.bat</strong> script and login to Azure using the same credentials you used in the previous exercise.</p>
+<p>Before moving forward, you should initialize the <strong>Azure CLI</strong>. In the main solution folder right click on the <strong>initialize.ps1</strong> script and select <strong>Run with Powershell</strong>. The script will log you in to Azure: use the same credentials you used in the previous exercise.</p>
 <blockquote>
 <p>In case you are using your own account to login to Azure and you have access to multiple subscriptions, the previous script will give you access to the <em>default subscription</em>. To switch subscriptions, you can use <code>az account set --subscription "SUB NAME OR ID"</code></p>
 </blockquote>
@@ -256,7 +256,7 @@ You will notice it contains two subfolders:</p>
 <p>At some point Visual Studio Code should prompt you to restore <em>unresolved dependencies</em> for the project: accept and click <strong>Restore</strong>.</p>
 </blockquote>
 <h4 id="translation-middleware">1. Translation middleware</h4>
-<p>The new Bot Framework v4 had the ASP<a href=""></a>.NET Core integration as one of its main goals. Actually, a v4 bot is nothing else than a ASP.()[]NET Core Web API with specialized middleware.<br><br>
+<p>The new Bot Framework v4 had the ASP<a href=""></a>.NET Core integration as one of its main goals. Actually, a v4 bot is nothing else than a ASP<a href=""></a>.NET Core Web API with specialized middleware.<br><br>
 Indeed, middleware is one of the bonus aspects of the v4 SDK: expanding and customizing the bot functionality is now much easier.</p>
 <blockquote>
 <p>A middleware is a piece of code that is assembled into an app pipeline to handle requests and responses. Middlewares are executed one by one, in the order in which they are declared in the <strong>Startup.ConfigureServices()</strong> method.</p>
@@ -284,10 +284,10 @@ options<span class="token punctuation">.</span>Middleware<span class="token punc
 <h4 id="create-the-language-selection-card">2. Create the language selection card</h4>
 <p>Now the translation middleware is plugged-in, it is time to construct the card that lets the user select their language.</p>
 <blockquote>
-<p>If the bot’s response to the user needs to contain something other than text, we can use a card to display any combination of text, speech, images, buttons, and input fields. There are different types of cards, depending on what type of interaction you are designing for your bot.</p>
+<p>If the bot’s response to the user needs to contain something other than text, you can use a card to display any combination of text, speech, images, buttons, and input fields. There are different types of cards, depending on what type of interaction you are designing for your bot.</p>
 </blockquote>
-<p>We have used a HeroCard as a simple way to present buttons to the user. The HeroCard allows us to create a list of suggested actions that will be shown to the user for a single turn of the conversation.</p>
-<p>In the <strong>RockTheBot.cs</strong> file, locate the <strong>SendLanguageCardAsync</strong> method:</p>
+<p>You will use a HeroCard as a simple way to present buttons to the user. The HeroCard allows to create a list of suggested actions to shown to the user for every conversation turn.</p>
+<p>In the <strong>RockTheBot.cs</strong> file, locate the <strong>SendLanguageCardAsync</strong> method (<strong>line 179</strong>):</p>
 <pre class=" language-c"><code class="prism # language-c">private <span class="token keyword">static</span> async Task <span class="token function">SendLanguageCardAsync</span><span class="token punctuation">(</span>ITurnContext turnContext<span class="token punctuation">,</span> CancellationToken cancellationToken<span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
    var reply <span class="token operator">=</span> turnContext<span class="token punctuation">.</span>Activity<span class="token punctuation">.</span><span class="token function">CreateReply</span><span class="token punctuation">(</span><span class="token string">"Choose your language:"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -306,7 +306,12 @@ options<span class="token punctuation">.</span>Middleware<span class="token punc
    await turnContext<span class="token punctuation">.</span><span class="token function">SendActivityAsync</span><span class="token punctuation">(</span>reply<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>You should now complete the method and define what the <strong>HeroCard</strong> card should look like.</p>
+<p>You should now complete the method and define what the <strong>HeroCard</strong> card should look like.<br><br>
+You need to define the card buttons for each language your bot needs to support. The card buttons should look like this:</p>
+<pre class=" language-c"><code class="prism # language-c">cardButtons<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>new <span class="token function">MultilingualCardAction</span><span class="token punctuation">(</span>language<span class="token punctuation">)</span> <span class="token punctuation">{</span> CardTitle <span class="token operator">=</span> <span class="token string">"English"</span><span class="token punctuation">,</span> Type <span class="token operator">=</span> ActionTypes<span class="token punctuation">.</span>PostBack<span class="token punctuation">,</span> Value <span class="token operator">=</span> EnglishEnglish <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Note you can customize the card’s title as well as the postback value it sends to the bot. This value is used by the tranlator middleware to understand what translation is requested. The value format is of type <strong><em>InputLanguage</em>OutputLanguage</strong>.<br><br>
+Add as many cards ad the languages your bot should support.</p>
 <blockquote>
 <p>Hint: you can peek at the implementation of a <em>HeroCard</em> for another user prompt in the method <strong>SendSuggestedActionsAsync</strong><br><br><br>
 The full code block is also available in the <strong>CodeFile.cs</strong> file.</p>
@@ -315,7 +320,7 @@ The full code block is also available in the <strong>CodeFile.cs</strong> file.<
 <p>If the bot is to send a welcome message every time a new user conversation starts, which is usually a desired feature, it needs to determine whether the message has already been sent. In addition, the bot needs to keep track of the users preferred language. Both of the above are typical situations where the bot state comes in handy.</p>
 <blockquote>
 <p>You can store and retrieve state data that is associated with a user, a conversation, or a specific user within the context of a specific conversation. State data can be used for many purposes, such as determining where the prior conversation left off or simply greeting a returning user by name.<br><br><br>
-Ideally, the bot state should persist the bot application lifetime. However that would require an out-of-memory external state provider (like a cache or a database).<br><br>
+Ideally, the bot state should persist the bot application lifetime. However that would require an out-of-memory state provider (like a cache or a database).<br><br>
 For testing and prototyping purposes, you can use the Bot Builder Framework’s in-memory data storage, but for production bots, it is recommended to implement your own storage adapter or use one of the available Azure Extensions (Table Storage, CosmosDB, or Azure SQL).</p>
 </blockquote>
 <p>In the <strong>OnTurnAsync</strong> method in <strong>RockTheBot.cs</strong> a flag has to be set in case the user has already been welcomed. After setting the <code>DidBotWelcomeUser</code> flag you also need to update the state objects to <em>commit</em>  the state change so that it will be persisted. <br><br>
@@ -615,7 +620,7 @@ While the <em><code>version</code></em> tag can be omitted and defaults to <em><
 <li>If you previously authenticated to Azure, you should see <em><strong>Login Succeeded</strong></em>. Alternatively, follow the login prompt until the command returns.</li>
 <li>At this time, Docker is authenticated to ACR and the images can be pushed to the registry.</li>
 <li>In Powershell or the command prompt type:<br><br>
-<code>docker push youraliasacr[]().azurecr.io/rockthebot</code></li>
+<code>docker push youraliasacr.azurecr.io/rockthebot</code></li>
 <li>The operation might take a while to complete and you should see the progress in the command output:<pre><code>The push refers to repository [albigiready19acr.azurecr.io/rockthebot]
 4ac7f152bb98: Pushed
 79a0035d08aa: Pushed
