@@ -1,7 +1,3 @@
-<head>
-   <title>Ready19 - AI-APP-ST315</title>
-</head>
-
 <h1><p align="center"> Microsoft Ready 2019 <br/><br/> AI-APP-ST315 <br/><br/><br/><br/> Rock the Bot: build a highly scalable Bot using Bot Framework, ASP.NET Core and Kubernetes
 </h1>
 <h2>
