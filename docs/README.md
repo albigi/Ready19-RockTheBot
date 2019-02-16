@@ -221,9 +221,8 @@ The script will log you in to Azure: use the same credentials you used in the pr
 
 ### Task 2 - Complete the code ###
 You will now start working on the actual bot code. This version of the code was slightly customized out of the default Azure Bot Service template. But don't worry, you will be adding all the juicy details and customizations!
->If you try to compile the code as is, it won't work. This is expected and you will have to complete it reading on.
-<br/>
-**NOTE**: you can skip this task by replacing the files *RockTheBot.cs* and *Startup.cs* with their pre-completed versions: **RockTheBot.cs.complete** and **Startup.cs.complete**. All you have to do is delete the original *.cs* files and remove the *.complete* file extension from the other two.
+>If you try to compile the code as is, it won't work. This is expected and you will have to complete it reading on.<br/><br/>
+	**NOTE**: you can skip this task by replacing the files *RockTheBot.cs* and *Startup.cs* with their pre-completed versions: **RockTheBot.cs.complete** and **Startup.cs.complete**. All you have to do is delete the original *.cs* files and remove the *.complete* file extension from the other two.
 
 First, open the **RockTheBot** folder in Visual Studio Code: right click on the folder in Explorer and select **Open with Code**.
 
