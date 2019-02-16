@@ -101,14 +101,12 @@ You need to use just one Virtual Machine, running Windows 10 and *Docker for Win
 
 ## GETTING THINGS READY ##
 To get started you will need:
-   -  an **Azure subscription**
-      
-      You can use your own or use the Azure Credentials provided with this lab (more info on the right ribbon of the main lab screen)
-
    -  one **Container Registry** (ACR)
    -  one **Azure Kubernetes Service** (AKS)
+   -  Azure subscription owner or contributor access to the AKS and ACR resources (to grant access permissions to ACR and AKS resources) 
    -  Docker client with the **Docker CLI** installed
    -  The **Azure CLI** installed
+   -  The **.NET Core 2.2 SDK** installed
 
 Once identified the Azure Subscription to use, please open a browser on the VM and **login to the Azure Portal** ([http://portal.azure.com](#)).
 
@@ -211,13 +209,21 @@ You will notice it contains two subfolders:
 1. **RockTheBot** is the actual bot folder!
 2. **ServicesProviderWeb** is a *service* ASP[]().NET Core Web API the bot relies on to access some of the data it needs. Its role will become clearer later in the exercises.
 
-Before moving forward, you should initialize the **Azure CLI**. In the main solution folder right click on the **initialize.ps1** script and select **Run with Powershell**. The script will log you in to Azure: use the same credentials you used in the previous exercise. 
+Before moving forward, you should initialize the **Azure CLI**. In the main solution folder right click on the **initialize.ps1** script and select **Run with Powershell**. 
+
+>Alternatively you can also open a Powershell or command prompt and type:<br/>
+`az account clear`<br/>
+`az login`<br/>
+
+The script will log you in to Azure: use the same credentials you used in the previous exercise. 
 
 >In case you are using your own account to login to Azure and you have access to multiple subscriptions, the previous script will give you access to the *default subscription*. To switch subscriptions, you can use `az account set --subscription "SUB NAME OR ID"`
 
 ### Task 2 - Complete the code ###
 You will now start working on the actual bot code. This version of the code was slightly customized out of the default Azure Bot Service template. But don't worry, you will be adding all the juicy details and customizations!
 >If you try to compile the code as is, it won't work. This is expected and you will have to complete it reading on.
+<br/>
+**NOTE**: you can skip this task by replacing the files *RockTheBot.cs* and *Startup.cs* with their pre-completed versions: **RockTheBot.cs.complete** and **Startup.cs.complete**. All you have to do is delete the original *.cs* files and remove the *.complete* file extension from the other two.
 
 First, open the **RockTheBot** folder in Visual Studio Code: right click on the folder in Explorer and select **Open with Code**.
 
